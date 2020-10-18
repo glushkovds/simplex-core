@@ -1,0 +1,33 @@
+{
+  "name": "glushkovds/simplex-core",
+  "description": "Core for simplex-cms",
+  "keywords": [
+    "php",
+    "simplex-core",
+    "simplex-cms"
+  ],
+  "homepage": "https://github.com/glushkovds/simplex-core",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Denis Glushkov",
+      "email": "amkarovec@gmail.com",
+      "homepage": "https://github.com/glushkovds"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "ext-gd": "*"
+  },
+  "require-dev": {
+  },
+  "suggest": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Simplex\\Core\\": "src/Core"
+    }
+  }
+}
+
