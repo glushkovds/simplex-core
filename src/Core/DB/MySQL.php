@@ -3,6 +3,8 @@
 
 namespace Simplex\Core\DB;
 
+use Simplex\Core\Config;
+
 /**
  * Class MySQL
  * @package Simplex\Core\DB
