@@ -84,8 +84,8 @@ class MySQL
                 }
             }
         } else {
-            if ($r instanceof mysqli_result) {
-                while ($row = mysqli_fetch_assoc($r)) {
+            if ($r instanceof \mysqli_result) {
+                while($row = mysqli_fetch_assoc($r)) {
                     $rows[] = $row;
                 }
             } else {

@@ -7,6 +7,7 @@ namespace Simplex\Core;
  * Class Container
  * @package App\Core
  * @method Config getConfig
+ * @method Page getPage
  */
 class Container
 {
