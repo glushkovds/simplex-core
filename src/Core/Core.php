@@ -132,7 +132,7 @@ class Core
 
     public static function getComponent()
     {
-        $class = $classDefault = Config::$component_default;
+        $class = $classDefault = Container::getConfig()::$component_default;
         $path = '/';
         $i = 0;
         if (!empty(self::$menu_by_link[md5($path)]['class'])) {
@@ -192,12 +192,13 @@ class Core
         if (self::$content_only) {
             Page::content();
         } else {
-            if (isset($_REQUEST['print']) && is_file('theme/' . Config::$theme . '/print.tpl')) {
-                include 'theme/' . Config::$theme . '/print.tpl';
+            $config = Container::getConfig();
+            if (isset($_REQUEST['print']) && is_file('theme/' . $config::$theme . '/print.tpl')) {
+                include 'theme/' . $config::$theme . '/print.tpl';
                 return;
             }
-            if (is_file('theme/' . Config::$theme . '/index.tpl')) {
-                include 'theme/' . Config::$theme . '/index.tpl';
+            if (is_file('theme/' . $config::$theme . '/index.tpl')) {
+                include 'theme/' . $config::$theme . '/index.tpl';
             }
         }
     }
@@ -242,11 +243,12 @@ class Core
 
     public static function error404()
     {
+        $config = Container::getConfig();
         header("HTTP/1.0 404 Not Found");
         Page::seo('Error 404');
-        if (is_file('theme/' . Config::$theme . '/404.tpl')) {
+        if (is_file('theme/' . $config::$theme . '/404.tpl')) {
             self::$content_only = true;
-            include 'theme/' . Config::$theme . '/404.tpl';
+            include 'theme/' . $config::$theme . '/404.tpl';
         } else {
             echo self::siteParam('error404');
         }

@@ -54,7 +54,7 @@ class ApiResponse
                     'text' => $this->errorMessage,
                 ]
             ] + $this->data;
-        if (Config::$debugMode) {
+        if (Container::getConfig()::$debugMode) {
             $result['debug']['sql'] = DB::getDebugQueries();
         }
         return $result;

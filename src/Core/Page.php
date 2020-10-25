@@ -24,7 +24,7 @@ class Page
 
     public static function init()
     {
-        $com =  Core::getComponent();
+        $com = Core::getComponent();
 
         $q = "
             SELECT t1.item_id, t1.module_id, t1.menu_id, t1.posname, t1.name, t2.class, t1.params, t2.postexec
@@ -34,7 +34,7 @@ class Page
             ORDER BY t1.npp, t1.item_id
         ";
         $rows = DB::assoc($q);
-        $curmenu =  Core::menuCurItem();
+        $curmenu = Core::menuCurItem();
         foreach ($rows as $row) {
             if (!$row['postexec'] && (empty($row['menu_id']) || (int)$row['menu_id'] == $curmenu['menu_id'])) {
                 $module = new $row['class']($row);
@@ -94,15 +94,15 @@ class Page
         JOIN module t2 ON t2.module_id=t1.module_id
         WHERE t1.active=1 AND t1.item_id=" . $module_id;
         if ($row = DB::result($q)) {
-        $module = new $row['class']($row);
-        echo $module->execute();
-    }
+            $module = new $row['class']($row);
+            echo $module->execute();
+        }
     }
 
     public static function css($file, $idx = 100)
     {
-        if (SF_INADMIN) {
-            return  AdminPage::css($file, $idx);
+        if (SF_LOCATION == SF_LOCATION_ADMIN) {
+            return AdminPage::css($file, $idx);
         }
         $idx = (int)$idx;
         if (empty(self::$css[$idx][md5($file)])) {
@@ -123,8 +123,8 @@ class Page
      */
     public static function js($file, $idx = 100)
     {
-        if (SF_INADMIN) {
-            return  AdminPage::js($file, $idx);
+        if (SF_LOCATION == SF_LOCATION_ADMIN) {
+            return AdminPage::js($file, $idx);
         }
         $idx = (int)$idx;
         if (empty(self::$js[$idx][md5($file)])) {
@@ -145,7 +145,7 @@ class Page
      */
     public static function jsInline($js, $idx = 100)
     {
-        if (SF_INADMIN) {
+        if (SF_LOCATION == SF_LOCATION_ADMIN) {
             return false;
         }
         $idx = (int)$idx;
@@ -160,7 +160,7 @@ class Page
 
     public static function meta()
     {
-        echo '<title>', str_replace('<br/>', '', htmlspecialchars(self::$seo_title)), self::$seo_title ? ' | ' : '',  Core::siteParam('site_name'), '</title>', "\r\n";
+        echo '<title>', str_replace('<br/>', '', htmlspecialchars(self::$seo_title)), self::$seo_title ? ' | ' : '', Core::siteParam('site_name'), '</title>', "\r\n";
         echo self::$seo_description ? '<meta name="description" content="' . htmlspecialchars(self::$seo_description) . '" />' . "\r\n" : '';
         echo self::$seo_keywords ? '<meta name="keywords" content="' . htmlspecialchars(self::$seo_keywords) . '" />' . "\r\n" : '';
         echo self::$seo_metatags ? self::$seo_metatags . "\r\n" : '';
@@ -176,11 +176,11 @@ class Page
 
     public static function metaCSS()
     {
-        $std =  Core::siteParam('static_domain');
-        $sub =  Core::siteParam('static_domain_sub') ? 'css.' : '';
-        $v = (int) Core::siteParam('static_version');
-        $hasCache = (bool) Core::siteParam('static_cache');
-        if ($hasCache && $cacheStr =  Core::siteParam('static_cache_css')) {
+        $std = Core::siteParam('static_domain');
+        $sub = Core::siteParam('static_domain_sub') ? 'css.' : '';
+        $v = (int)Core::siteParam('static_version');
+        $hasCache = (bool)Core::siteParam('static_cache');
+        if ($hasCache && $cacheStr = Core::siteParam('static_cache_css')) {
             $cache = array_filter(array_map('trim', explode("\n", $cacheStr)));
             if ($hasCache = (bool)count($cache)) {
                 $cache = array_flip($cache);
@@ -203,11 +203,11 @@ class Page
 
     public static function metaJS()
     {
-        $std =  Core::siteParam('static_domain');
-        $sub =  Core::siteParam('static_domain_sub') ? 'js.' : '';
-        $v = (int) Core::siteParam('static_version');
-        $hasCache = (bool) Core::siteParam('static_cache');
-        if ($hasCache && $cacheStr =  Core::siteParam('static_cache_js')) {
+        $std = Core::siteParam('static_domain');
+        $sub = Core::siteParam('static_domain_sub') ? 'js.' : '';
+        $v = (int)Core::siteParam('static_version');
+        $hasCache = (bool)Core::siteParam('static_cache');
+        if ($hasCache && $cacheStr = Core::siteParam('static_cache_js')) {
             $cache = array_filter(array_map('trim', explode("\n", $cacheStr)));
             if ($hasCache = (bool)count($cache)) {
                 $cache = array_flip($cache);

@@ -3,7 +3,7 @@
 
 namespace Simplex\Core\DB;
 
-use Simplex\Core\Config;
+use Simplex\Core\Container;
 
 /**
  * Class MySQL
@@ -21,8 +21,9 @@ class MySQL
 
     public function connect()
     {
-        $this->link = mysqli_connect( Config::$db_host,  Config::$db_user,  Config::$db_pass) or die("<b>Error! Can not connect to MySQL.</b>");
-        mysqli_select_db($this->link,  Config::$db_name) or die("<b>Error! Can not select database.</b>");
+        $config = Container::getConfig();
+        $this->link = mysqli_connect($config::$db_host, $config::$db_user, $config::$db_pass) or die("<b>Error! Can not connect to MySQL.</b>");
+        mysqli_select_db($this->link, $config::$db_name) or die("<b>Error! Can not select database.</b>");
         mysqli_query($this->link, "SET names utf8");
         mysqli_query($this->link, "SET time_zone = '" . date('P') . "'");
     }

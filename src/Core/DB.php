@@ -20,7 +20,7 @@ class DB
 
     private static function create()
     {
-        switch (Config::$db_type) {
+        switch (Container::getConfig()::$db_type) {
             case 'mysql' :
                 return new DB\MySQL();
             default :

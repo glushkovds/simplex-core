@@ -22,7 +22,8 @@ class Log
 
     private static function getFileName($suffix = '')
     {
-        if (!is_dir($rootDir = empty( Config::$logPath) ? __DIR__ . '../log' :  Config::$logPath)) {
+        $config = Container::getConfig();
+        if (!is_dir($rootDir = empty($config::$logPath) ? __DIR__ . '../log' : $config::$logPath)) {
             if (!@mkdir($rootDir, 0700, true)) {
                 return null;
             }
@@ -49,7 +50,8 @@ class Log
 
     private static function write($content, $level)
     {
-        if (self::$levels[$level] > self::$levels[empty( Config::$logLevel) ? 'error' :  Config::$logLevel]) {
+        $config = Container::getConfig();
+        if (self::$levels[$level] > self::$levels[empty($config::$logLevel) ? 'error' : $config::$logLevel]) {
             return;
         }
         $str = self::buildStr($content, $level) . "\n";
