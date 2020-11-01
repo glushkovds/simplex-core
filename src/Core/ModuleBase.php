@@ -3,7 +3,7 @@
 namespace Simplex\Core;
 
 
-abstract class ModBase extends ExtBase
+abstract class ModuleBase extends ExtensionBase
 {
 
     protected $id = 0;
@@ -28,7 +28,7 @@ abstract class ModBase extends ExtBase
 
     public final function execute()
     {
-        if ( Core::ajax()) {
+        if (Core::ajax()) {
             ob_start();
             $this->content();
             return ob_get_clean();

@@ -3,7 +3,7 @@
 namespace Simplex\Core;
 
 
-abstract class ExtBase
+abstract class ExtensionBase
 {
 
     /**
