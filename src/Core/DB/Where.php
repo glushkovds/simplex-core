@@ -3,7 +3,9 @@
 namespace Simplex\Core\DB;
 
 
-class Where implements ArrayAccess
+use Simplex\Core\ModelBase;
+
+class Where implements \ArrayAccess
 {
 
     private $data = array();
@@ -11,7 +13,7 @@ class Where implements ArrayAccess
     /**
      *
      * @param mixed $where
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct($where = [])
     {
@@ -58,7 +60,7 @@ class Where implements ArrayAccess
     /**
      * @param bool $withWhereWord = true
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
     public function toString($withWhereWord = true)
     {
@@ -70,7 +72,7 @@ class Where implements ArrayAccess
 
     /**
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     public function toArray()
     {
@@ -80,7 +82,7 @@ class Where implements ArrayAccess
     /**
      * @param array $data
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     protected static function prepareData(array $data)
     {
@@ -113,11 +115,11 @@ class Where implements ArrayAccess
     }
 
     /**
-     * @param string|array|Where $where
+     * @param string|array|static $where
      */
     public function add($where)
     {
-        $this->data = array_filter(array_merge($this->toArray(), (new Where($where))->toArray()));
+        $this->data = array_filter(array_merge($this->toArray(), (new static($where))->toArray()));
     }
 
 }
