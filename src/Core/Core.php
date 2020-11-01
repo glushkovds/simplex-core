@@ -273,4 +273,17 @@ class Core
         return (self::isHttps() ? 'https' : 'http') . ($withSlashDots ? '://' : '');
     }
 
+    /**
+     * @return string like /vendor/glushkovds/simplex-core/src
+     */
+    public static function webVendorPath()
+    {
+        return str_replace(SF_ROOT_PATH, '', static::vendorPath());
+    }
+
+    public static function vendorPath()
+    {
+        return realpath(__DIR__ . '/..');
+    }
+
 }
