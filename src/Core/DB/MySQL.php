@@ -55,6 +55,9 @@ class MySQL
 
     public function result($r, $field = '')
     {
+        if (!$r) {
+            return false;
+        }
         if (is_int($field)) {
             $result = mysqli_fetch_row($r);
             return $result[$field] ? $result[$field] : false;
@@ -85,7 +88,7 @@ class MySQL
             }
         } else {
             if ($r instanceof \mysqli_result) {
-                while($row = mysqli_fetch_assoc($r)) {
+                while ($row = mysqli_fetch_assoc($r)) {
                     $rows[] = $row;
                 }
             } else {
@@ -112,7 +115,7 @@ class MySQL
             1451 => 'Нельзя удалить запись, имеются связанные записи'
         );
         $n = mysqli_errno($this->link);
-        return $n > 0 ? 'Ошибка. Код: ' . $n . '. ' . (isset($errs[$n]) ? $errs[$n] : mysql_error()) : '';
+        return $n > 0 ? 'Ошибка. Код: ' . $n . '. ' . (isset($errs[$n]) ? $errs[$n] : mysqli_error($this->link)) : '';
     }
 
     public function escape($str)
