@@ -111,7 +111,7 @@ class MySQL
         $errs = array(
             1451 => 'Нельзя удалить запись, имеются связанные записи'
         );
-        $n = mysqli_errno();
+        $n = mysqli_errno($this->link);
         return $n > 0 ? 'Ошибка. Код: ' . $n . '. ' . (isset($errs[$n]) ? $errs[$n] : mysql_error()) : '';
     }
 
