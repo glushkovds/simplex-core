@@ -102,7 +102,7 @@ class Page
     public static function css($file, $idx = 100)
     {
         if (SF_LOCATION == SF_LOCATION_ADMIN) {
-            return AdminPage::css($file, $idx);
+            return \Simplex\Admin\Page::css($file, $idx);
         }
         $idx = (int)$idx;
         if (empty(self::$css[$idx][md5($file)])) {
@@ -124,7 +124,7 @@ class Page
     public static function js($file, $idx = 100)
     {
         if (SF_LOCATION == SF_LOCATION_ADMIN) {
-            return AdminPage::js($file, $idx);
+            return \Simplex\Admin\Page::js($file, $idx);
         }
         $idx = (int)$idx;
         if (empty(self::$js[$idx][md5($file)])) {
