@@ -118,7 +118,7 @@ class UserInstance
     /**
      * Возвращает информацию о пользователе
      * @param string (optional) $field - если указано, возвращает конкретное поле
-     * @return array
+     * @return false|array|string
      */
     public function info($field = false)
     {

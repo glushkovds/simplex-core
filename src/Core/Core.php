@@ -109,7 +109,7 @@ class Core
         return $path ? $path : '/';
     }
 
-    public static function siteParam($key = false)
+    public static function siteParam($key = false, $defultValue = null)
     {
 
         if (!self::$site_params) {
@@ -124,10 +124,10 @@ class Core
             return self::$site_params;
         }
         if (!isset(self::$site_params[$key])) {
-            self::$site_params[$key] = '';
-            $q = "INSERT INTO settings(name, alias, value) VALUES('Новый параметр')";
+            self::$site_params[$key] = $defultValue;
+            $q = "INSERT INTO settings(name, alias, value) VALUES('New parameter')";
         }
-        return isset(self::$site_params[$key]) ? self::$site_params[$key] : '';
+        return isset(self::$site_params[$key]) ? self::$site_params[$key] : $defultValue;
     }
 
     public static function getComponent()

@@ -15,9 +15,9 @@ class MySQL
 
     /**
      *
-     * @var mysqli
+     * @var \mysqli
      */
-    private $link;
+    protected $link;
 
     public function connect()
     {

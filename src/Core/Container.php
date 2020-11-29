@@ -9,6 +9,7 @@ namespace Simplex\Core;
  * @method Config getConfig
  * @method Page getPage
  * @method Core getCore
+ * @method User getUser
  */
 class Container
 {
