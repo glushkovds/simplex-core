@@ -10,8 +10,8 @@ class DB
      *
      * @var MySQL
      */
-    private static $db = false;
-    private static $queries = array();
+    protected static $db = false;
+    protected static $queries = array();
 
     private function __construct()
     {
@@ -30,14 +30,14 @@ class DB
 
     public static function connect()
     {
-        self::$db = self::create();
-        self::$db->connect();
+        static::$db = static::create();
+        static::$db->connect();
     }
 
     public static function bind($vars)
     {
         if (is_array($vars)) {
-            return self::$db->bind($vars);
+            return static::$db->bind($vars);
         }
         return false;
     }
@@ -45,37 +45,50 @@ class DB
     public static function &query($q)
     {
         $t = microtime(1);
-        $r = self::$db->query($q);
-        if (self::$db->errno()) {
-            if (imDev()) {
-                echo '<pre>', $q, '</pre>';
-                echo self::$db->error();
-            }
+        $r = static::$db->query($q);
+        if (static::$db->errno()) {
+            static::logError($q);
         }
         if (imDev()) {
-            self::$queries[] = array('time' => microtime(1) - $t, 'sql' => $q, 'error' => self::$db->errno() ? self::$db->error() : '');
+            static::$queries[] = array('time' => microtime(1) - $t, 'sql' => $q, 'error' => static::$db->errno() ? static::$db->error() : '');
         }
         return $r;
     }
 
+    protected static function logError($query)
+    {
+        if (empty(Container::getConfig()::$db_errorLog)) {
+            return;
+        }
+        $errno = static::$db->errno();
+        $error = static::$db->error();
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $call = @$trace[1]['file'] . ':' . @$trace[1]['line'];
+        $message = "MySQL error $errno: $error; sql: $query; call: $call";
+        error_log($message);
+        if (imDev()) {
+            echo $message . "\n";
+        }
+    }
+
     public static function fetch(&$result)
     {
-        return self::$db->fetch($result);
+        return static::$db->fetch($result);
     }
 
     public static function result($q, $field = '')
     {
-        return self::$db->result(self::query($q), $field);
+        return static::$db->result(static::query($q), $field);
     }
 
     public static function assoc($q, $field1 = false, $field2 = false)
     {
-        return self::$db->assoc(self::query($q), $field1, $field2, $q);
+        return static::$db->assoc(static::query($q), $field1, $field2, $q);
     }
 
     public static function insertID()
     {
-        return self::$db->insertID();
+        return static::$db->insertID();
     }
 
     public static function getTime($time, $length = 4)
@@ -88,12 +101,12 @@ class DB
     public static function debug($time, $length = 4)
     {
         if (User::ican('debug')) {
-            $time = self::getTime($time, $length);
-            echo '<div style="position:absolute;z-index:10000;top:18px;right:50%;margin-right:-600px;cursor:pointer;border:1px dashed #999;padding:2px 7px;line-height:1.2;background-color:#EEE;font-size:11px;color:#363"  onclick="document.getElementById(\'debug-box\').style.display = document.getElementById(\'debug-box\').style.display==\'block\' ? \'none\' : \'block\'"><span style="color:#444">', count(self::$queries), '</span> / <span style="color:#666">', number_format($time, $length), '</span></div>';
+            $time = static::getTime($time, $length);
+            echo '<div style="position:absolute;z-index:10000;top:18px;right:50%;margin-right:-600px;cursor:pointer;border:1px dashed #999;padding:2px 7px;line-height:1.2;background-color:#EEE;font-size:11px;color:#363"  onclick="document.getElementById(\'debug-box\').style.display = document.getElementById(\'debug-box\').style.display==\'block\' ? \'none\' : \'block\'"><span style="color:#444">', count(static::$queries), '</span> / <span style="color:#666">', number_format($time, $length), '</span></div>';
             echo '<div id="debug-box" style="display:none;position:absolute;z-index:10000;top:48px;right:50%;margin-right:-600px;width:300px;height:500px;overflow:auto;border:1px dashed #999;padding:2px 7px;line-height:1.2;background-color:#EEE;font-size:11px;color:#363">';
             echo '<table style="table-layout:auto;">';
             $sumTime = 0;
-            foreach (self::$queries as $key => $val) {
+            foreach (static::$queries as $key => $val) {
                 $sumTime += $val['time'];
                 echo '<tr>';
                 echo '<td style="color:#999;padding:2px 4px;vertical-align:top">', $key + 1, '</td>';
@@ -117,24 +130,24 @@ class DB
 
     public static function errno()
     {
-        return self::$db->errno();
+        return static::$db->errno();
     }
 
     public static function error()
     {
-        return self::$db->error();
+        return static::$db->error();
     }
 
     public static function escape($mixed)
     {
         if (is_array($mixed)) {
             foreach ($mixed as $index => $str) {
-                $mixed[$index] = self::escape($str);
+                $mixed[$index] = static::escape($str);
             }
             return $mixed;
         }
 
-        return self::$db->escape($mixed);
+        return static::$db->escape($mixed);
     }
 
     public static function enumValues($table, $field)
@@ -174,22 +187,22 @@ class DB
 
     public static function affectedRows()
     {
-        return self::$db->affectedRows();
+        return static::$db->affectedRows();
     }
 
     public static function transactionStart()
     {
-        self::query('BEGIN');
+        static::query('BEGIN');
     }
 
     public static function transactionCommit()
     {
-        self::query('COMMIT');
+        static::query('COMMIT');
     }
 
     public static function transactionRollback()
     {
-        self::query('ROLLBACK');
+        static::query('ROLLBACK');
     }
 
     /**
@@ -198,17 +211,17 @@ class DB
      */
     public static function transactionEnd($success)
     {
-        $success ? self::transactionCommit() : self::transactionRollback();
+        $success ? static::transactionCommit() : static::transactionRollback();
     }
 
     public static function seek(&$r, $index)
     {
-        return self::$db->seek($r, $index);
+        return static::$db->seek($r, $index);
     }
 
     public static function fetchReset(&$r)
     {
-        return self::seek($r, 0);
+        return static::seek($r, 0);
     }
 
 }

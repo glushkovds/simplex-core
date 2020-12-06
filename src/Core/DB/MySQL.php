@@ -111,6 +111,11 @@ class MySQL
 
     public function error()
     {
+        return mysqli_error($this->link);
+    }
+
+    public function errorPrepared()
+    {
         $errs = array(
             1451 => 'Нельзя удалить запись, имеются связанные записи'
         );
