@@ -125,7 +125,7 @@ class Core
         }
         if (!isset(self::$site_params[$key])) {
             self::$site_params[$key] = $defultValue;
-            $q = "INSERT INTO settings(name, alias, value) VALUES('Новый параметр')";
+            $q = "INSERT INTO settings(name, alias, value) VALUES('New parameter')";
         }
         return isset(self::$site_params[$key]) ? self::$site_params[$key] : $defultValue;
     }
