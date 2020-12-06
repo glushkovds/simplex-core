@@ -17,6 +17,7 @@ class ControllerBase extends ComponentBase
 
     public function __construct()
     {
+        parent::__construct();
         $this->s = &$_SESSION[get_class($this)]['session'];
         if (!isset($this->d)) {
             $this->d = array();
