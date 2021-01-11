@@ -21,4 +21,15 @@ class ConsoleBase
         exec($command);
     }
 
+    public static function execInTime(callable $closure, float $seconds)
+    {
+        $timeStart = microtime(true);
+        $closure();
+        $diff = microtime(true) - $timeStart;
+        $wait = $seconds - $diff;
+        if ($wait > 0) {
+            usleep($wait * 1e6);
+        }
+    }
+
 }
