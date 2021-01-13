@@ -117,15 +117,16 @@ class UserInstance
 
     /**
      * Возвращает информацию о пользователе
-     * @param string (optional) $field - если указано, возвращает конкретное поле
+     * @param string|false $field (optional) - если указано, возвращает конкретное поле
+     * @param bool $buffered
      * @return false|array|string
      */
-    public function info($field = false)
+    public function info($field = false, $buffered = true)
     {
         if (!$this->id) {
             return false;
         }
-        if (!isset($this->info)) {
+        if (!isset($this->info) || !$buffered) {
             $q = "select * from user where user_id = " . $this->id;
             $this->info = DB::result($q);
             $this->info['role_name'] = $this->role_name;
