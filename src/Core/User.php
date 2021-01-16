@@ -34,6 +34,15 @@ class User
         self::$role_name = self::$instance->role_name;
     }
 
+    public static function logout()
+    {
+        self::$instance->logout();
+        self::$id = 0;
+        self::$login = null;
+        self::$role_id = null;
+        self::$role_name = null;
+    }
+
     public static function privIds()
     {
         return self::$instance->privIds();

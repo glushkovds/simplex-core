@@ -187,6 +187,15 @@ class Core
         }
     }
 
+    /**
+     * @return string[]
+     */
+    public static function getExtensions()
+    {
+        $exts = array_slice(scandir(SF_ROOT_PATH . '/Extensions'), 2);
+        return $exts;
+    }
+
     public static function execute()
     {
         if (self::$content_only) {

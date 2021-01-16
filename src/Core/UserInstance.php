@@ -38,63 +38,63 @@ class UserInstance
         $this->login();
     }
 
+    public function logout()
+    {
+        $_SESSION[$this->idName] = 0;
+        $_SESSION[$this->hashName] = '';
+        setcookie($this->remIdName);
+        setcookie($this->remHashName);
+        unset($_COOKIE[$this->remIdName]);
+        unset($_COOKIE[$this->remHashName]);
+    }
+
     private function login()
     {
-        if (isset($_REQUEST['logout'])) {
-            $_SESSION[$this->idName] = 0;
-            $_SESSION[$this->hashName] = '';
-            setcookie($this->remIdName);
-            setcookie($this->remHashName);
-            unset($_COOKIE[$this->remIdName]);
-            unset($_COOKIE[$this->remHashName]);
-        } else {
-
-            if (!isset($_SESSION[$this->idName]) && isset($_COOKIE[$this->remIdName]) && isset($_COOKIE[$this->remHashName])) {
-                $userId_md5 = DB::escape($_COOKIE[$this->remIdName]);
-                $hash = DB::escape($_COOKIE[$this->remHashName]);
-                $q = "select user_id `id` from `user` where md5(`user_id`) = '$userId_md5' and $this->dbHashName = '$hash'";
-                if ($userId = DB::result($q, "id")) {
-                    $_SESSION[$this->idName] = $userId;
-                    $_SESSION[$this->hashName] = $hash;
-                    setcookie($this->remIdName, $_COOKIE[$this->remIdName], time() + 60 * 60 * 24 * 3, "/");
-                    setcookie($this->remHashName, $_COOKIE[$this->remHashName], time() + 60 * 60 * 24 * 3, "/");
-                }
+        if (!isset($_SESSION[$this->idName]) && isset($_COOKIE[$this->remIdName]) && isset($_COOKIE[$this->remHashName])) {
+            $userId_md5 = DB::escape($_COOKIE[$this->remIdName]);
+            $hash = DB::escape($_COOKIE[$this->remHashName]);
+            $q = "select user_id `id` from `user` where md5(`user_id`) = '$userId_md5' and $this->dbHashName = '$hash'";
+            if ($userId = DB::result($q, "id")) {
+                $_SESSION[$this->idName] = $userId;
+                $_SESSION[$this->hashName] = $hash;
+                setcookie($this->remIdName, $_COOKIE[$this->remIdName], time() + 60 * 60 * 24 * 3, "/");
+                setcookie($this->remHashName, $_COOKIE[$this->remHashName], time() + 60 * 60 * 24 * 3, "/");
             }
+        }
 
-            // Authorization for API, for authorize method
-            if (!empty($GLOBALS[self::class]['login']) && !empty($GLOBALS[self::class]['password'])) {
-                $q = "
+        // Authorization for API, for authorize method
+        if (!empty($GLOBALS[self::class]['login']) && !empty($GLOBALS[self::class]['password'])) {
+            $q = "
                     SELECT user_id, role_id, login, $this->dbHashName, r.name role_name
                     FROM user u
                     JOIN user_role r USING(role_id)
                     WHERE login='" . DB::escape($GLOBALS[self::class]['login']) . "' AND u.active=1 AND r.active=1
                 ";
-                $r = DB::query($q);
-                if ($row = DB::fetch($r)) {
-                    if (md5($GLOBALS[self::class]['password']) === $row['password']) {
-                        $this->id = (int)$row[$this->idName];
-                        $this->login = $row['login'];
-                        $this->role_id = (int)$row['role_id'];
-                        $this->role_name = $row['role_name'];
-                    }
+            $r = DB::query($q);
+            if ($row = DB::fetch($r)) {
+                if (md5($GLOBALS[self::class]['password']) === $row['password']) {
+                    $this->id = (int)$row[$this->idName];
+                    $this->login = $row['login'];
+                    $this->role_id = (int)$row['role_id'];
+                    $this->role_name = $row['role_name'];
                 }
             }
+        }
 
-            if (!empty($_SESSION[$this->idName]) && !empty($_SESSION[$this->hashName])) {
-                $q = "
+        if (!empty($_SESSION[$this->idName]) && !empty($_SESSION[$this->hashName])) {
+            $q = "
                     SELECT user_id, role_id, login, $this->dbHashName, r.name role_name
                     FROM user u
                     JOIN user_role r USING(role_id)
                     WHERE user_id=" . (int)$_SESSION[$this->idName] . " AND u.active=1 AND r.active=1
                 ";
-                $r = DB::query($q);
-                if ($row = DB::fetch($r)) {
-                    if ($_SESSION[$this->hashName] === $row[$this->dbHashName]) {
-                        $this->id = (int)$_SESSION[$this->idName];
-                        $this->login = $row['login'];
-                        $this->role_id = (int)$row['role_id'];
-                        $this->role_name = $row['role_name'];
-                    }
+            $r = DB::query($q);
+            if ($row = DB::fetch($r)) {
+                if ($_SESSION[$this->hashName] === $row[$this->dbHashName]) {
+                    $this->id = (int)$_SESSION[$this->idName];
+                    $this->login = $row['login'];
+                    $this->role_id = (int)$row['role_id'];
+                    $this->role_name = $row['role_name'];
                 }
             }
         }
