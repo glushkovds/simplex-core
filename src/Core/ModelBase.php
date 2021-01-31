@@ -90,7 +90,7 @@ abstract class ModelBase implements \ArrayAccess
      * @param null $orderBy
      * @param null $limit
      * @param bool|string $assocKey [optional = false] get result array with model id's (or other field) in keys
-     * @return  ModelBase[]
+     * @return  static[]
      * @throws \Exception
      */
     public static function find($where, $orderBy = null, $limit = null, $assocKey = false)
@@ -110,7 +110,7 @@ abstract class ModelBase implements \ArrayAccess
     /**
      *
      * @param string|array|Where $where
-     * @return  ModelBase|null
+     * @return  static|null
      */
     public static function findOne($where, $returnModelIfNotFound = false)
     {
