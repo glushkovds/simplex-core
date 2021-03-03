@@ -45,6 +45,8 @@ class MySQL
 
     public function fetch(&$result)
     {
+	if ($result === false)
+            return null;
         return mysqli_fetch_assoc($result);
     }
 

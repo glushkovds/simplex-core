@@ -217,7 +217,7 @@ class Page
         ksort(self::$js);
         foreach (self::$js as $js_arr) {
             foreach ($js_arr as $js) {
-                if ('inline' === (string)@$js['type']) {
+                if (is_array($js) && 'inline' === (string)@$js['type']) {
                     echo '<script type="text/javascript">', $js['value'], '</script>', "\r\n";
                     continue;
                 }
