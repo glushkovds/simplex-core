@@ -30,17 +30,19 @@ class Cache
      * @param string $key
      * @param callable $callback
      * @param int $expires Cache value validity in seconds
+     * @param bool $fetchedFromCache additional return value, true if fetched from cache, false if pushed to cache
      * @return mixed
-     * @throws Exception
+     * @throws \Exception
      */
-    public static function getOrSet(string $key, callable $callback, int $expires = 0)
+    public static function getOrSet(string $key, callable $callback, int $expires = 0, &$fetchedFromCache = null)
     {
         $value = static::get($key);
-        if (is_null($value)) {
+        $fetchedFromCache = !is_null($value);
+        if (!$fetchedFromCache) {
             $value = $callback();
             static::set($key, $value, $expires);
-            return $value;
         }
+        return $value;
     }
 
     /**
