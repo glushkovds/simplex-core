@@ -14,10 +14,11 @@ interface Adapter
     /**
      * Bounds array items to the query
      *
-     * @param array $vars Items to bind
+     * @param array $params Items to bind
      * @return void
+     * @deprecated Use $params in query() instead
      */
-    public function bind(array $vars);
+    public function bind(array $params);
 
     /**
      * Executes a SQL query with previously (optional) bound items

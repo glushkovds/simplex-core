@@ -40,10 +40,10 @@ class MySQL implements Adapter
         }
     }
 
-    public function bind(array $vars)
+    public function bind(array $params)
     {
         $sql = [];
-        foreach ($vars as $k => $v) {
+        foreach ($params as $k => $v) {
             $sql[] = "@$k=" . (is_numeric($v) ? $v : "'" . $this->escape($v) . "'");
         }
 

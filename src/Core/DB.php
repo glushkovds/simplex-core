@@ -45,13 +45,14 @@ class DB
 
     /**
      * @see Adapter::bind()
-     * @param $vars
+     * @param $params
      * @return bool
+     * @deprecated Use $params in query()/assoc()/result() instead
      */
-    public static function bind($vars): bool
+    public static function bind($params): bool
     {
-        if (is_array($vars)) {
-            static::$db->bind($vars);
+        if (is_array($params)) {
+            static::$db->bind($params);
             return true;
         }
 
