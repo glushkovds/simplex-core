@@ -53,15 +53,15 @@ class MySQL implements Adapter
 
     /**
      * @param string $q
-     * @param array $vars
+     * @param array $params
      * @return false|PDOStatement
      */
-    public function query(string $q, array $vars = [])
+    public function query(string $q, array $params = [])
     {
         $_ENV['lastq'] = $q;
 
         $query = $this->db->prepare($q, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
-        if ($query->execute($vars)) {
+        if ($query->execute($params)) {
             $this->lastQuery = $query;
             return $query;
         } else {

@@ -23,10 +23,10 @@ interface Adapter
      * Executes a SQL query with previously (optional) bound items
      *
      * @param string $q SQL query
-     * @param array $vars Vars for prepared statement
+     * @param array $params Vars for prepared statement
      * @return mixed False if fails, adapter-specific object containing result
      */
-    public function query(string $q, array $vars = []);
+    public function query(string $q, array $params = []);
 
     /**
      * Fetches current row

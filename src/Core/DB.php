@@ -60,15 +60,15 @@ class DB
 
     /**
      * @param string $q
-     * @param array $vars
+     * @param array $params
      * @return mixed
      * @see Adapter::query()
      */
-    public static function &query(string $q, array $vars = [])
+    public static function &query(string $q, array $params = [])
     {
         $execTime = microtime(1);
 
-        $result = static::$db->query($q, $vars);
+        $result = static::$db->query($q, $params);
         if (static::$db->errno()) {
             static::logError($q);
         }
@@ -123,26 +123,26 @@ class DB
     /**
      * @param string $q SQL query to execute
      * @param string $field
-     * @param array $vars
+     * @param array $params
      * @return mixed
      * @see Adapter::result()
      */
-    public static function result(string $q, $field = '', array $vars = [])
+    public static function result(string $q, $field = '', array $params = [])
     {
-        return static::$db->result(static::query($q, $vars), $field);
+        return static::$db->result(static::query($q, $params), $field);
     }
 
     /**
      * @param string $q SQL query to execute
      * @param mixed $field1
      * @param mixed $field2
-     * @param array $vars
+     * @param array $params
      * @return mixed
      * @see Adapter::assoc()
      */
-    public static function assoc(string $q, $field1 = false, $field2 = false, array $vars = [])
+    public static function assoc(string $q, $field1 = false, $field2 = false, array $params = [])
     {
-        return static::$db->assoc(static::query($q, $vars), $field1, $field2);
+        return static::$db->assoc(static::query($q, $params), $field1, $field2);
     }
 
     /**
