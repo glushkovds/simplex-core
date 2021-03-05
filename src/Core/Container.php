@@ -5,15 +5,15 @@ namespace Simplex\Core;
 
 /**
  * Class Container
+ *
  * @package App\Core
- * @method Config getConfig
- * @method Page getPage
- * @method Core getCore
- * @method User getUser
+ * @method static Config getConfig
+ * @method static Page getPage
+ * @method static Core getCore
+ * @method static User getUser
  */
 class Container
 {
-
     /** @var array */
     protected static $registry = [];
 
@@ -30,10 +30,9 @@ class Container
     public static function __callStatic($name, $arguments)
     {
         if (strpos($name, 'get') === 0) {
-            $registryName = lcfirst(substr($name, 3));
-            return static::get($registryName);
+            return static::get(lcfirst(substr($name, 3)));
         }
+
         throw new \BadMethodCallException();
     }
-
 }

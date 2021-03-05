@@ -54,7 +54,7 @@ class Sms
         if (!$success) {
             return 'Server error'; //false;
         }
-        $smsId = DB::insertID();
+        $smsId = DB::insertId();
 
         $result = self::sendById($smsId, $phone, $text, $from);
         return $result;
