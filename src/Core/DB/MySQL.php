@@ -53,15 +53,15 @@ class MySQL implements Adapter
 
     /**
      * @param string $q
-     *
+     * @param array $vars
      * @return false|PDOStatement
      */
-    public function query(string $q)
+    public function query(string $q, array $vars = [])
     {
         $_ENV['lastq'] = $q;
 
         $query = $this->db->prepare($q, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
-        if ($query->execute()) {
+        if ($query->execute($vars)) {
             $this->lastQuery = $query;
             return $query;
         } else {
@@ -71,7 +71,7 @@ class MySQL implements Adapter
 
     public function fetch(&$result)
     {
-        if ($result === false) {
+        if (!$result) {
             return null;
         } else {
             /** @var PDOStatement $result */
@@ -81,7 +81,7 @@ class MySQL implements Adapter
 
     public function seek(&$result, int $index): bool
     {
-        if ($result === false) {
+        if (!$result) {
             return false;
         } else {
             /** @var PDOStatement $result */
@@ -98,7 +98,7 @@ class MySQL implements Adapter
      */
     public function result($result, $field = '')
     {
-        if ($result === false) {
+        if (!$result) {
             return false;
         } else {
             /** @var PDOStatement $result */
@@ -116,19 +116,13 @@ class MySQL implements Adapter
      * @param bool|PDOStatement $result
      * @param bool $f1
      * @param bool $f2
-     * @param bool $q
      *
      * @return array|bool
      */
-    public function assoc(&$result, $f1 = false, $f2 = false, $q = false)
+    public function assoc(&$result, $f1 = false, $f2 = false)
     {
-        if ($result === false) {
-            if ($q) {
-                echo $q;
-                die;
-            } else {
-                return false;
-            }
+        if (!$result) {
+            return false;
         } else {
             $rows = [];
 
@@ -191,5 +185,20 @@ class MySQL implements Adapter
     public function affectedRows(): int
     {
         return $this->lastQuery ? $this->lastQuery->rowCount() : 0;
+    }
+
+    public function beginTransaction()
+    {
+        $this->db->beginTransaction();
+    }
+
+    public function commitTransaction()
+    {
+        $this->db->commit();
+    }
+
+    public function rollbackTransaction()
+    {
+        $this->db->rollBack();
     }
 }

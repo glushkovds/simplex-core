@@ -59,15 +59,16 @@ class DB
     }
 
     /**
-     * @see Adapter::query()
-     * @param $q
+     * @param string $q
+     * @param array $vars
      * @return mixed
+     * @see Adapter::query()
      */
-    public static function &query($q)
+    public static function &query(string $q, array $vars = [])
     {
         $execTime = microtime(1);
 
-        $result = static::$db->query($q);
+        $result = static::$db->query($q, $vars);
         if (static::$db->errno()) {
             static::logError($q);
         }
@@ -120,26 +121,28 @@ class DB
     }
 
     /**
-     * @see Adapter::result()
      * @param string $q SQL query to execute
      * @param string $field
+     * @param array $vars
      * @return mixed
+     * @see Adapter::result()
      */
-    public static function result(string $q, $field = '')
+    public static function result(string $q, $field = '', array $vars = [])
     {
-        return static::$db->result(static::query($q), $field);
+        return static::$db->result(static::query($q, $vars), $field);
     }
 
     /**
-     * @see Adapter::assoc()
      * @param string $q SQL query to execute
      * @param mixed $field1
      * @param mixed $field2
+     * @param array $vars
      * @return mixed
+     * @see Adapter::assoc()
      */
-    public static function assoc($q, $field1 = false, $field2 = false)
+    public static function assoc(string $q, $field1 = false, $field2 = false, array $vars = [])
     {
-        return static::$db->assoc(static::query($q), $field1, $field2, $q);
+        return static::$db->assoc(static::query($q, $vars), $field1, $field2);
     }
 
     /**
@@ -238,7 +241,7 @@ class DB
             echo '</table>';
             echo '</div>';
 
-            if (Core::uri(0) != 'admin') {
+            if (SF_LOCATION == SF_LOCATION_ADMIN) {
                 $divStyle = 'position:absolute;z-index:10000;top:48px;right:50%;margin-right:-600px;padding:1px 8px;'
                     . 'background:#EEE;border:1px dashed #666;font-size:11px;color:#666';
 
@@ -306,7 +309,6 @@ class DB
 
         if (!isset($buffer)) {
             $row = DB::result("SHOW FULL COLUMNS FROM `$table` LIKE '$field'");
-
             $names = explode(';;', $row['Comment']);
 
             $enumArray = [];
@@ -357,7 +359,7 @@ class DB
      */
     public static function transactionStart()
     {
-        static::query('BEGIN');
+        static::$db->beginTransaction();
     }
 
     /**
@@ -365,7 +367,7 @@ class DB
      */
     public static function transactionCommit()
     {
-        static::query('COMMIT');
+        static::$db->commitTransaction();
     }
 
     /**
@@ -373,7 +375,7 @@ class DB
      */
     public static function transactionRollback()
     {
-        static::query('ROLLBACK');
+        static::$db->rollbackTransaction();
     }
 
     /**

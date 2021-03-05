@@ -23,9 +23,10 @@ interface Adapter
      * Executes a SQL query with previously (optional) bound items
      *
      * @param string $q SQL query
+     * @param array $vars Vars for prepared statement
      * @return mixed False if fails, adapter-specific object containing result
      */
-    public function query(string $q);
+    public function query(string $q, array $vars = []);
 
     /**
      * Fetches current row
@@ -59,10 +60,9 @@ interface Adapter
      * @param mixed $result Adapter-specific result object
      * @param bool|string $f1 Column name to use as key or false to use index
      * @param bool|string $f2 Second column name for inner rows
-     * @param bool|string $q Debug message to print if fails or false to not care
      * @return mixed Array containing results
      */
-    public function assoc(&$result, $f1, $f2, $q);
+    public function assoc(&$result, $f1, $f2);
 
     /**
      * Returns last insert ID
@@ -106,4 +106,25 @@ interface Adapter
      * @return int Row count
      */
     public function affectedRows(): int;
+
+    /**
+     * Begins transaction
+     *
+     * @return void
+     */
+    public function beginTransaction();
+
+    /**
+     * Commits transaction
+     *
+     * @return void
+     */
+    public function commitTransaction();
+
+    /**
+     * Rollbacks transaction
+     *
+     * @return void
+     */
+    public function rollbackTransaction();
 }
