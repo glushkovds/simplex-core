@@ -1,137 +1,204 @@
 <?php
 
-
 namespace Simplex\Core\DB;
 
+use PDO;
+use PDOException;
+use PDOStatement;
 use Simplex\Core\Container;
 
 /**
  * Class MySQL
+ *
  * @package Simplex\Core\DB
- * @deprecated rewrite to PDO
  */
-class MySQL
+class MySQL implements Adapter
 {
+    /**
+     * @var PDO
+     */
+    private $db;
 
     /**
-     *
-     * @var \mysqli
+     * @var PDOStatement
      */
-    protected $link;
+    private $lastQuery;
 
-    public function connect()
+    public function connect(): bool
     {
-        $config = Container::getConfig();
-        $this->link = mysqli_connect($config::$db_host, $config::$db_user, $config::$db_pass) or die("<b>Error! Can not connect to MySQL.</b>");
-        mysqli_select_db($this->link, $config::$db_name) or die("<b>Error! Can not select database.</b>");
-        mysqli_query($this->link, "SET names utf8");
-        mysqli_query($this->link, "SET time_zone = '" . date('P') . "'");
-    }
+        $cfg = Container::getConfig();
+        $host = $cfg::$db_host;
+        $database = $cfg::$db_name;
 
-    public function bind($vars)
-    {
-        $q = 'SET';
-        foreach ($vars as $key => $val) {
-            $q .= ' @' . $key . '=' . (is_numeric($val) ? $val : "'" . mysqli_escape_string($this->link, $val) . "'") . ',';
+        try {
+            $this->db = new PDO("mysql:host=$host;dbname=$database", $cfg::$db_user, $cfg::$db_pass);
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+            return true;
+        } catch (PDOException $ex) {
+            die('<b>Error! Could not connect to database: ' . $ex->getMessage() . '</b>');
         }
-        return mysqli_query($this->link, substr($q, 0, -1));
     }
 
-    public function query($q)
+    public function bind(array $params)
+    {
+        $sql = [];
+        foreach ($params as $k => $v) {
+            $sql[] = "@$k=" . (is_numeric($v) ? $v : "'" . $this->escape($v) . "'");
+        }
+
+        $query = $this->db->prepare('SET ' . implode(',', $sql));
+        $query->execute();
+    }
+
+    /**
+     * @param string $q
+     * @param array $params
+     * @return false|PDOStatement
+     */
+    public function query(string $q, array $params = [])
     {
         $_ENV['lastq'] = $q;
-        return mysqli_query($this->link, $q);
+
+        $query = $this->db->prepare($q, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
+        if ($query->execute($params)) {
+            $this->lastQuery = $query;
+            return $query;
+        } else {
+            return false;
+        }
     }
 
     public function fetch(&$result)
     {
-        return mysqli_fetch_assoc($result);
-    }
-
-    public function seek(&$r, $index)
-    {
-        return @mysqli_data_seek($r, $index);
-    }
-
-    public function result($r, $field = '')
-    {
-        if (!$r) {
-            return false;
-        }
-        if (is_int($field)) {
-            $result = mysqli_fetch_row($r);
-            return $result[$field] ? $result[$field] : false;
-        }
-        $result = mysqli_fetch_assoc($r);
-        return $field ? (isset($result[$field]) ? $result[$field] : false) : $result;
-    }
-
-    public function assoc(&$r, $field1 = false, $field2 = false, $q = FALSE)
-    {
-        $rows = array();
-        if ($field1) {
-            if ($field2 === false) {
-//                if(!$r){
-//                    echo $q;die;
-//                }
-                while ($row = mysqli_fetch_assoc($r)) {
-                    $rows[$row[$field1]] = $row;
-                }
-            } elseif ($field2) {
-                while ($row = mysqli_fetch_assoc($r)) {
-                    $rows[$row[$field1]][$row[$field2]] = $row;
-                }
-            } else {
-                while ($row = mysqli_fetch_assoc($r)) {
-                    $rows[$row[$field1]][] = $row;
-                }
-            }
+        if (!$result) {
+            return null;
         } else {
-            if ($r instanceof \mysqli_result) {
-                while ($row = mysqli_fetch_assoc($r)) {
-                    $rows[] = $row;
-                }
-            } else {
+            /** @var PDOStatement $result */
+            return $result->fetch(PDO::FETCH_ASSOC);
+        }
+    }
 
+    public function seek(&$result, int $index): bool
+    {
+        if (!$result) {
+            return false;
+        } else {
+            /** @var PDOStatement $result */
+            $result->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, max($index - 1, 0));
+            return true;
+        }
+    }
+
+    /**
+     * @param bool|PDOStatement $result
+     * @param int|string $field
+     *
+     * @return bool|array
+     */
+    public function result($result, $field = '')
+    {
+        if (!$result) {
+            return false;
+        } else {
+            /** @var PDOStatement $result */
+            if (is_int($field)) {
+                $r = $result->fetch(PDO::FETCH_NUM);
+                return $r && isset($r[$field]) ? $r[$field] : false;
+            } else {
+                $r = $result->fetch(PDO::FETCH_ASSOC);
+                return $field ? ($r && isset($r[$field]) ? $r[$field] : false) : $r;
             }
         }
-        return $rows;
     }
 
-    public function insertID()
+    /**
+     * @param bool|PDOStatement $result
+     * @param bool $f1
+     * @param bool $f2
+     *
+     * @return array|bool
+     */
+    public function assoc(&$result, $f1 = false, $f2 = false)
     {
-        $ret = mysqli_fetch_row($this->query("SELECT LAST_INSERT_ID()"));
-        return $ret[0];
+        if (!$result) {
+            return false;
+        } else {
+            $rows = [];
+
+            /** @var PDOStatement $result */
+            if ($f1) {
+                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                    if ($f2 === false) {
+                        $rows[$row[$f1]] = $row;
+                    } elseif ($f2) {
+                        $rows[$row[$f1]][$row[$f2]] = $row;
+                    } else {
+                        $rows[$row[$f1]][] = $row;
+                    }
+                }
+            } else {
+                $rows = $result->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            return $rows;
+        }
     }
 
-    public function errno()
+    public function insertId(): string
     {
-        return mysqli_errno($this->link);
+        return $this->db->lastInsertId();
     }
 
-    public function error()
+    public function errno(): ?string
     {
-        return mysqli_error($this->link);
+        return $this->db->errorCode();
     }
 
-    public function errorPrepared()
+    public function error(): ?string
     {
-        $errs = array(
-            1451 => 'Нельзя удалить запись, имеются связанные записи'
-        );
-        $n = mysqli_errno($this->link);
-        return $n > 0 ? 'Ошибка. Код: ' . $n . '. ' . (isset($errs[$n]) ? $errs[$n] : mysqli_error($this->link)) : '';
+        return $this->db->errorInfo()[2];
     }
 
-    public function escape($str)
+    public function errorPrepared(): string
     {
-        return mysqli_escape_string($this->link, $str);
+        $errorList = [
+            1451 => 'Нельзя удалить запись - имеются связанные записи'
+        ];
+
+        $errNo = $this->errno();
+        if ($errNo > 0) {
+            $message = "Ошибка. Код: $errNo. ";
+            $message .= isset($errorList[$errNo]) ? $errorList[$errNo] : $this->error();
+
+            return $message;
+        } else {
+            return '';
+        }
     }
 
-    public function affectedRows()
+    public function escape(string $str): string
     {
-        return mysqli_affected_rows($this->link);
+        return substr($this->db->quote($str), 1, -1);
     }
 
+    public function affectedRows(): int
+    {
+        return $this->lastQuery ? $this->lastQuery->rowCount() : 0;
+    }
+
+    public function beginTransaction()
+    {
+        $this->db->beginTransaction();
+    }
+
+    public function commitTransaction()
+    {
+        $this->db->commit();
+    }
+
+    public function rollbackTransaction()
+    {
+        $this->db->rollBack();
+    }
 }
-

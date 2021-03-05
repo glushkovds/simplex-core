@@ -4,7 +4,7 @@ namespace Simplex\Core\DB;
 
 
 use Simplex\Core\DB;
-use Simplex\Core\ ModelBase;
+use Simplex\Core\ModelBase;
 
 /**
  * Class AQ

@@ -194,7 +194,7 @@ abstract class ModelBase implements \ArrayAccess
             $ignore = $flags & static::FLAG_IGNORE ? ' IGNORE' : '';
             $q = "INSERT$ignore INTO " . static::$table . " SET " . implode(', ', $set);
             if ($result = $this->query($q)) {
-                $this->id = DB::insertID();
+                $this->id = DB::insertId();
             }
         }
         $this->afterInsert($result);

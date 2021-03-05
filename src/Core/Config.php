@@ -5,7 +5,6 @@ namespace Simplex\Core;
 
 class Config
 {
-
     public static $db_type = 'mysql';
     public static $db_host = 'localhost';
     public static $db_user = 'root';

@@ -109,7 +109,7 @@ class User
         $set = array("login = '$login', email = '$email', name = '$name', password = '$passMD5', hash = '$hash'");
         $q = "INSERT INTO user SET " . implode(', ', $set);
         DB::query($q);
-        $userId = DB::insertID();
+        $userId = DB::insertId();
 
         if (!$userId) {
             return array('success' => false, 'error_code' => 5, 'error' => 'Ошибка регистрации');
