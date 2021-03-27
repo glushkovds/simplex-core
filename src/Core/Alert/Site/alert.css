@@ -33,7 +33,7 @@
 }
 
 .plug-alert-warning, .plug-alert-error {
-    background: url(img/warning.png) no-repeat scroll 8px 8px, linear-gradient(#FFEDC1, #FCDE8D);
+    background: url(img/warning.png) no-repeat scroll 8px 50%, linear-gradient(#FFEDC1, #FCDE8D);
     border: 1px solid #EA9936;
     color: #FF4500;
     text-shadow: 1px 1px 1px #FFEDC1;
