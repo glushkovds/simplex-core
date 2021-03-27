@@ -12,8 +12,9 @@ class ConsoleBase
      * @param int|null $maxSame Max parallel processes allowed
      * @param string|null $sameKey Used only with $maxSame parameter.
      *                             Optional, if empty it will be calculated as md5 of $job and $params
+     * @param int|false $timeout max execution time in seconds. false = limitless
      */
-    public static function toBackground($job, $params = [], $maxSame = null, $sameKey = null)
+    public static function toBackground($job, $params = [], $maxSame = null, $sameKey = null, $timeout = false)
     {
         $tmp = [];
         if ($maxSame) {
@@ -31,6 +32,9 @@ class ConsoleBase
         }
         $paramsStr = implode(' ', $tmp);
         $command = "php {$_SERVER['DOCUMENT_ROOT']}/console.php $job $paramsStr > /dev/null 2>&1 &";
+        if (is_int($timeout) && $timeout > 0) {
+            $command = "timeout -s 9 {$timeout}s $command";
+        }
         Log::debug($command);
         exec($command);
     }
