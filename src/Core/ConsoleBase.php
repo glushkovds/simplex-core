@@ -51,15 +51,20 @@ class ConsoleBase
         }
     }
 
+    /**
+     * @param string $key
+     * @param bool $excludeTimeoutProcess
+     * @return int
+     */
     protected static function findJobsCount($key, $excludeTimeoutProcess = false)
     {
-        $output = [];
-        $command = 'ps aux | grep "' . $key . '"';
+        $command = 'ps aux | grep "' . $key . '" | grep -v grep';
         if ($excludeTimeoutProcess) {
             $command .= ' | grep -v "timeout -s"';
         }
+        $command .= ' | wc -l';
         exec($command, $output);
-        return count($output) - 2;
+        return (int)trim(shell_exec($command));
     }
 
 }
