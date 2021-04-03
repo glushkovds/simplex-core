@@ -16,10 +16,11 @@ class ConsoleBase
      */
     public static function toBackground($job, $params = [], $maxSame = null, $sameKey = null, $timeout = false)
     {
+        $applyTimeout = is_int($timeout) && $timeout > 0;
         $tmp = [];
         if ($maxSame) {
             $sameKey || $sameKey = md5($job . serialize($params));
-            if (static::findJobsCount($sameKey) >= $maxSame) {
+            if (static::findJobsCount($sameKey, $applyTimeout) >= $maxSame) {
                 return;
             }
             $params['sameKey'] = $sameKey;
@@ -32,7 +33,7 @@ class ConsoleBase
         }
         $paramsStr = implode(' ', $tmp);
         $command = "php {$_SERVER['DOCUMENT_ROOT']}/console.php $job $paramsStr > /dev/null 2>&1 &";
-        if (is_int($timeout) && $timeout > 0) {
+        if ($applyTimeout) {
             $command = "timeout -s 9 {$timeout}s $command";
         }
         Log::debug($command);
@@ -50,10 +51,14 @@ class ConsoleBase
         }
     }
 
-    protected static function findJobsCount($key)
+    protected static function findJobsCount($key, $excludeTimeoutProcess = false)
     {
         $output = [];
-        exec('ps aux | grep "' . $key . '"', $output);
+        $command = 'ps aux | grep "' . $key . '"';
+        if ($excludeTimeoutProcess) {
+            $command .= ' | grep -v "timeout -s"';
+        }
+        exec($command, $output);
         return count($output) - 2;
     }
 
