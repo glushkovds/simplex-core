@@ -35,6 +35,14 @@ abstract class ModelBase implements \ArrayAccess
     /**
      * @return string
      */
+    public static function getTableName()
+    {
+        return static::$table;
+    }
+
+    /**
+     * @return string
+     */
     public static function getPrimaryKeyName()
     {
         return static::$primaryKeyName;
