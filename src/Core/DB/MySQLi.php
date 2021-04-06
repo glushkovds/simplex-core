@@ -139,7 +139,7 @@ class MySQLi implements Adapter
      */
     public function beginTransaction()
     {
-        // TODO: Implement beginTransaction() method.
+        mysqli_query($this->link, 'START TRANSACTION');
     }
 
     /**
@@ -147,7 +147,7 @@ class MySQLi implements Adapter
      */
     public function commitTransaction()
     {
-        // TODO: Implement commitTransaction() method.
+        mysqli_query($this->link, 'COMMIT');
     }
 
     /**
@@ -155,7 +155,7 @@ class MySQLi implements Adapter
      */
     public function rollbackTransaction()
     {
-        // TODO: Implement rollbackTransaction() method.
+        mysqli_query($this->link, 'ROLLBACK');
     }
 }
 
