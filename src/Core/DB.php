@@ -28,6 +28,8 @@ class DB
         switch (Container::getConfig()::$db_type) {
             case 'mysql':
                 return new DB\MySQL();
+            case 'mysqli':
+                return new DB\MySQLi();
             default:
                 die("<b>Error! Unknown Database type.</b>");
         }

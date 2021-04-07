@@ -77,7 +77,9 @@ class Cache
             || ($til = $contents[0]) && !($til = (int)$til)
             || !in_array($type = $contents[1], ['numeric', 'string', 'array', 'object', 'null', 'bool'])
         ) {
-            throw new \Exception("Broken cache file $fp");
+            unlink($fp);
+            return null;
+//            throw new \Exception("Broken cache file $fp");
         }
         if ($til && $til < time()) {
             unlink($fp);
