@@ -261,9 +261,9 @@ class DB
 
     /**
      * @see Adapter::errno()
-     * @return string|null
+     * @return int
      */
-    public static function errno(): ?string
+    public static function errno(): int
     {
         return static::$db->errno();
     }
@@ -275,6 +275,15 @@ class DB
     public static function error(): ?string
     {
         return static::$db->error();
+    }
+
+    /**
+     * @see Adapter::errorCode()
+     * @return string|null
+     */
+    public static function errorCode(): ?string
+    {
+        return static::$db->errorCode();
     }
 
     /**

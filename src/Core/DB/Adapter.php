@@ -75,9 +75,9 @@ interface Adapter
     /**
      * Returns last SQL error code
      *
-     * @return string Last error code
+     * @return int Last error code
      */
-    public function errno(): ?string;
+    public function errno(): int;
 
     /**
      * Returns error string or null if error code was not specified by the adapter
@@ -85,6 +85,13 @@ interface Adapter
      * @return string|null Error message
      */
     public function error(): ?string;
+
+    /**
+     * Returns MySQL-styled error code (.....)
+     *
+     * @return string|null
+     */
+    public function errorCode(): ?string;
 
     /**
      * Returns formatted error message
