@@ -61,12 +61,9 @@ class MySQL implements Adapter
         $_ENV['lastq'] = $q;
 
         $query = $this->db->prepare($q, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
-        if ($query->execute($params)) {
-            $this->lastQuery = $query;
-            return $query;
-        } else {
-            return false;
-        }
+        $this->lastQuery = $query;
+
+        return $query->execute($params) ? $query : false;
     }
 
     public function fetch(&$result)
@@ -150,14 +147,19 @@ class MySQL implements Adapter
         return $this->db->lastInsertId();
     }
 
-    public function errno(): ?string
+    public function errno(): int
     {
-        return $this->db->errorCode();
+        return $this->lastQuery ? ($this->lastQuery->errorInfo()[1] ?? 0) : 0;
     }
 
     public function error(): ?string
     {
-        return $this->db->errorInfo()[2];
+        return $this->lastQuery ? $this->lastQuery->errorInfo()[2] : null;
+    }
+
+    public function errorCode(): ?string
+    {
+        return $this->lastQuery ? $this->db->errorCode() : null;
     }
 
     public function errorPrepared(): string
