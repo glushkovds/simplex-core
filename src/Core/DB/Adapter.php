@@ -87,7 +87,7 @@ interface Adapter
     public function error(): ?string;
 
     /**
-     * Returns MySQL-styled error code (.....)
+     * Returns SQLSTATE error code
      *
      * @return string|null
      */
