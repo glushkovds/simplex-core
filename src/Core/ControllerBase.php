@@ -10,7 +10,6 @@ namespace Simplex\Core;
  */
 class ControllerBase extends ComponentBase
 {
-
     protected $s; // private session for class
     protected $d; // private data for class
     protected $action = '';
@@ -24,9 +23,13 @@ class ControllerBase extends ComponentBase
         }
     }
 
+    public function index()
+    {
+    }
+
     protected function content()
     {
-        $mname = $this->mname();
+        $mname = $this->getMethodName();
         if (!method_exists($this, $mname)) {
             Core::error404();
         }
@@ -37,29 +40,33 @@ class ControllerBase extends ComponentBase
      * Find appropriate method by path
      * @return string
      */
-    protected function mname()
+    protected function getMethodName(): string
     {
         if ($this->action) {
             return $this->action;
         }
 
         // by default
-        $mname = $default = "index";
+        $name = $default = "index";
         $uri = Core::uri();
-        // if /article/1/
+
         if (isset($uri[1]) && (int)$uri[1]) {
-            $mname = 'item';
-        } // read URI
-        elseif (isset($uri[1]) && $uri[1]) {
-            $mname = $uri[1];
+            // if /article/1/
+            $name = 'item';
+        } elseif (isset($uri[1]) && $uri[1]) {
+            // read URI
+            $name = $uri[1];
         }
 
-        return $mname;
+        return $name;
     }
 
-    public function index()
+    /**
+     * @return string
+     * @deprecated use getMethodName()
+     */
+    protected function mname(): string
     {
-
+        return $this->getMethodName();
     }
-
 }
