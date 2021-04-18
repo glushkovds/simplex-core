@@ -105,7 +105,7 @@ class MySQLi implements Adapter
         return $ret[0];
     }
 
-    public function errno(): string
+    public function errno(): int
     {
         return mysqli_errno($this->link);
     }
