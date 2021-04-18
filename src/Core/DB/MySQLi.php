@@ -157,5 +157,13 @@ class MySQLi implements Adapter
     {
         mysqli_query($this->link, 'ROLLBACK');
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function errorCode(): ?string
+    {
+        return (string)$this->errno();
+    }
 }
 
