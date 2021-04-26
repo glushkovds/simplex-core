@@ -17,6 +17,11 @@ class Core
     private static $component_menu_id = 0;
     private static $content_only = false;
 
+    private function __construct()
+    {
+
+    }
+
     public static function init()
     {
         $url_info = parse_url($_SERVER['REQUEST_URI']);
@@ -54,8 +59,7 @@ class Core
             self::$site_params[$row['alias']] = $row['value'];
         }
 
-        $q = "SELECT t1.menu_id, t1.menu_pid, t1.hidden, t1.component_id, t1.name, t1.link, t1.priv_id,
-               t2.class
+        $q = "SELECT t1.*, t2.class
         FROM menu t1
         LEFT JOIN component t2 ON t2.component_id=t1.component_id
         WHERE t1.active=1
