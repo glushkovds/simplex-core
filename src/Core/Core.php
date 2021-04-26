@@ -2,33 +2,28 @@
 
 namespace Simplex\Core;
 
-
 class Core
 {
-
     private static $ajax = false;
-    private static $uri = array();
+    private static $uri = [];
     private static $path = '';
     private static $site_params = false;
-    private static $menu_tree = array();
-    private static $menu_by_id = array();
-    private static $menu_by_link = array();
-    private static $menu_by_ext = array();
+    private static $menu_tree = [];
+    private static $menu_by_id = [];
+    private static $menu_by_link = [];
+    private static $menu_by_ext = [];
     private static $menu_cur = false;
     private static $component_level = 0;
     private static $component_menu_id = 0;
     private static $content_only = false;
-
-    private function __construct()
-    {
-
-    }
 
     public static function init()
     {
         $url_info = parse_url($_SERVER['REQUEST_URI']);
         self::$path = $url_info['path'];
         self::$uri = array_slice(explode('/', self::$path), 1);
+
+        // TODO: get rid of deprecated code
         DB::bind(array('SITE_PATH' => self::$path, 'SITE_LINK' => $url_info['path'] . (isset($url_info['query']) ? '?' . $url_info['query'] : '')));
 
         if (!empty($_REQUEST['sf_plug_name'])) {
@@ -59,12 +54,13 @@ class Core
             self::$site_params[$row['alias']] = $row['value'];
         }
 
-        $q = "SELECT t1.menu_id, t1.menu_pid, t1.hidden, t1.component_id, t1.name, t1.link,
+        $q = "SELECT t1.menu_id, t1.menu_pid, t1.hidden, t1.component_id, t1.name, t1.link, t1.priv_id,
                t2.class
         FROM menu t1
         LEFT JOIN component t2 ON t2.component_id=t1.component_id
         WHERE t1.active=1
         ORDER BY t1.npp";
+
         $rows = DB::assoc($q);
         foreach ($rows as $row) {
             self::$menu_tree[(int)$row['menu_pid']][(int)$row['menu_id']] = $row;
@@ -88,13 +84,13 @@ class Core
             return self::$uri;
         }
         $i += self::$component_level;
-        return isset(self::$uri[$i]) ? self::$uri[$i] : '';
+        return self::$uri[$i] ?? '';
     }
 
     public static function uri_r($i)
     {
         $i = count(self::$uri) - 2 - $i;;
-        return isset(self::$uri[$i]) ? self::$uri[$i] : '';
+        return self::$uri[$i] ?? '';
     }
 
     public static function path($beg = 0, $len = 0)
@@ -127,7 +123,7 @@ class Core
             self::$site_params[$key] = $defultValue;
             $q = "INSERT INTO settings(name, alias, value) VALUES('New parameter')";
         }
-        return isset(self::$site_params[$key]) ? self::$site_params[$key] : $defultValue;
+        return self::$site_params[$key] ?? $defultValue;
     }
 
     public static function getComponent()
