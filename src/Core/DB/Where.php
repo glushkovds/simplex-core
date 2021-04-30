@@ -98,7 +98,7 @@ class Where implements \ArrayAccess
             }
             if ($isAssociative = (string)$index !== (string)(int)$index) {
                 if (is_array($value)) {
-                    $values = implode(',', array_map(['\Simplex\Core\ModelBase', 'prepareValue'], $value));
+                    $values = implode(',', array_map([ModelBase::class, 'prepareValue'], $value));
                     $result[] = "`$index` IN ($values)";
                 } else {
                     $result[] = "`$index` = " .  ModelBase::prepareValue($value);
