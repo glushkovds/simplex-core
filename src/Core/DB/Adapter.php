@@ -104,9 +104,10 @@ interface Adapter
      * Escapes string
      *
      * @param string $str String to escape
+     * @param bool $leaveQuotes Should leave quotes after escape?
      * @return string Escaped string
      */
-    public function escape(string $str): string;
+    public function escape(string $str, bool $leaveQuotes = false): string;
 
     /**
      * Returns amount of affected rows by the last executed statement

@@ -179,8 +179,13 @@ class MySQL implements Adapter
         }
     }
 
-    public function escape(string $str): string
+    public function escape(string $str, bool $leaveQuotes = false): string
     {
+        $q = $this->db->quote($str);
+        if ($leaveQuotes) {
+            return $q;
+        }
+
         return substr($this->db->quote($str), 1, -1);
     }
 

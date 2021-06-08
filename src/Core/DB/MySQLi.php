@@ -124,7 +124,7 @@ class MySQLi implements Adapter
         return $n > 0 ? 'Ошибка. Код: ' . $n . '. ' . (isset($errs[$n]) ? $errs[$n] : mysqli_error($this->link)) : '';
     }
 
-    public function escape(string $str): string
+    public function escape(string $str, bool $leaveQuotes = false): string
     {
         return mysqli_escape_string($this->link, $str);
     }

@@ -293,9 +293,10 @@ class DB
      *
      * @see Adapter::escape()
      * @param array|string $mixed Target to escape
+     * @param bool $leaveQuotes Should leave quotes after escape?
      * @return array|string
      */
-    public static function escape($mixed)
+    public static function escape($mixed, bool $leaveQuotes = false)
     {
         if (is_array($mixed)) {
             foreach ($mixed as $index => $str) {
@@ -305,7 +306,7 @@ class DB
             return $mixed;
         }
 
-        return static::$db->escape($mixed);
+        return static::$db->escape($mixed, $leaveQuotes);
     }
 
     /**
