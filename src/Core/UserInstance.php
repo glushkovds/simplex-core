@@ -3,7 +3,12 @@
 
 namespace Simplex\Core;
 
-
+/**
+ * Class UserInstance
+ * @package Simplex\Core
+ * @deprecated use Container::getUser() and \Simplex\Core\Models\User and Simplex Auth package
+ * @link https://github.com/glushkovds/simplex-auth
+ */
 class UserInstance
 {
 
@@ -46,6 +51,14 @@ class UserInstance
         setcookie($this->remHashName);
         unset($_COOKIE[$this->remIdName]);
         unset($_COOKIE[$this->remHashName]);
+    }
+    
+    public function initByModel(\Simplex\Core\Models\User $model){
+        $this->id = $model->getId();
+        $this->login = $model->login;
+        $this->role_id = $model->roleId;
+        $this->role_name = $model->role->name;
+        $this->login();
     }
 
     private function login()
@@ -99,19 +112,21 @@ class UserInstance
             }
         }
 
-        $q = "
-            SELECT priv_id, name
-            FROM user_priv
-            WHERE active=1
-            AND (
-                priv_id IN(SELECT priv_id FROM user_role_priv WHERE role_id" . ($this->role_id ? '=' . (int)$this->role_id : " IS NULL") . ")
-                OR priv_id IN(SELECT priv_id FROM user_priv_personal WHERE user_id=" . $this->id . ")
-            )
-        ";
-        $r = DB::query($q);
-        while ($row = DB::fetch($r)) {
-            $this->priv_ids[(int)$row['priv_id']] = (int)$row['priv_id'];
-            $this->priv_names[$row['name']] = $row['name'];
+        if ($this->id) {
+            $q = "
+                SELECT priv_id, name
+                FROM user_priv
+                WHERE active=1
+                AND (
+                    priv_id IN(SELECT priv_id FROM user_role_priv WHERE role_id" . ($this->role_id ? '=' . (int)$this->role_id : " IS NULL") . ")
+                    OR priv_id IN(SELECT priv_id FROM user_priv_personal WHERE user_id=" . $this->id . ")
+                )
+            ";
+            $r = DB::query($q);
+            while ($row = DB::fetch($r)) {
+                $this->priv_ids[(int)$row['priv_id']] = (int)$row['priv_id'];
+                $this->priv_names[$row['name']] = $row['name'];
+            }
         }
     }
 

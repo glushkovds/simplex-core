@@ -45,4 +45,34 @@ class Str
         return trim($string);
     }
 
+    /**
+     * @param string $str
+     * @param bool $firstIsLower
+     * @return string|string[]
+     */
+    public static function toCamel($str, $firstIsLower = true)
+    {
+        if ($firstIsLower) {
+            $parts = explode('_', $str);
+            $result = $parts[0] . implode('', array_map('ucfirst', array_slice($parts, 1)));
+        } else {
+            $result = str_replace('_', '', ucwords($str, '_'));
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $str
+     * @return string
+     */
+    public static function toUnderscore($str)
+    {
+        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $str, $matches);
+        $ret = $matches[0];
+        foreach ($ret as &$match) {
+            $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+        }
+        return implode('_', $ret);
+    }
+
 }

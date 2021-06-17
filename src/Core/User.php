@@ -5,6 +5,12 @@ namespace Simplex\Core;
 
 use Simplex\Core\Helpers\Phone;
 
+/**
+ * Class User
+ * @package Simplex\Core
+ * @deprecated use Container::getUser() and \Simplex\Core\Models\User and Simplex Auth package
+ * @link https://github.com/glushkovds/simplex-auth
+ */
 class User
 {
     public static $id = 0;
@@ -27,6 +33,9 @@ class User
         if ('admin' == $type) {
             self::$instance = new UserInstance('admin_user_id', 'admin_user_hash', 'hash_admin', 'cha', 'csa');
         }
+        if ($type instanceof UserInstance) {
+            self::$instance = $type;
+        }
 
         self::$id = self::$instance->id;
         self::$login = self::$instance->login;
@@ -37,6 +46,15 @@ class User
     public static function logout()
     {
         self::$instance->logout();
+        self::$id = 0;
+        self::$login = null;
+        self::$role_id = null;
+        self::$role_name = null;
+    }
+
+    public static function logout2()
+    {
+        self::$instance = new UserInstance('', '', '', '', '');
         self::$id = 0;
         self::$login = null;
         self::$role_id = null;

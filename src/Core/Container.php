@@ -10,9 +10,10 @@ namespace Simplex\Core;
  * @method static Config getConfig
  * @method static Page getPage
  * @method static Core getCore
- * @method static User getUser
+ * @method static \Simplex\Core\Models\User|null getUser
  * @method static \Simplex\Core\Request getRequest
  * @method static \Simplex\Core\Response getResponse
+ * @method static User getUserLegacy
  */
 class Container
 {

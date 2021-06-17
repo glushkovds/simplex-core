@@ -6,6 +6,7 @@ namespace Simplex\Core;
 use Simplex\Core\DB\AQ;
 use Simplex\Core\DB\Expr;
 use Simplex\Core\DB\Where;
+use Simplex\Core\Helpers\Str;
 
 /**
  * Usage
@@ -87,7 +88,7 @@ abstract class ModelBase implements \ArrayAccess
             return DB::enumValues(static::$table, $fieldName);
         };
         if ($withBuffer && class_exists(' Buffer')) {
-            return  Buffer::getOrSet('enumValues.' . static::$table . ".$fieldName", $closure);
+            return Buffer::getOrSet('enumValues.' . static::$table . ".$fieldName", $closure);
         }
         return $closure();
     }
@@ -409,17 +410,6 @@ abstract class ModelBase implements \ArrayAccess
         }
     }
 
-    protected static function underscoreToCamelCase($str, $firstIsLower = true)
-    {
-        if ($firstIsLower) {
-            $parts = explode('_', $str);
-            $result = $parts[0] . implode('', array_map('ucfirst', array_slice($parts, 1)));
-        } else {
-            $result = str_replace('_', '', ucwords($str, '_'));
-        }
-        return $result;
-    }
-
     public function offsetExists($offset)
     {
         return isset($this->data[$offset]);
@@ -436,10 +426,13 @@ abstract class ModelBase implements \ArrayAccess
     public function offsetGet($offset)
     {
         if ($this->id && !isset($this->data[$offset])) {
+            if ($maybe = $this->data[Str::toUnderscore($offset)]) {
+                return $maybe;
+            }
             if (method_exists($this, $method = 'offsetGet' . lcfirst($offset))) {
                 $this->data[$offset] = $this->$method();
             }
-            if (method_exists($this, $method = 'offsetGet' . $this->underscoreToCamelCase($offset, false))) {
+            if (method_exists($this, $method = 'offsetGet' . Str::toCamel($offset, false))) {
                 $this->data[$offset] = $this->$method();
             }
         }
