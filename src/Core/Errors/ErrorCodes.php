@@ -8,9 +8,23 @@ class ErrorCodes
     /** @var int Дефолтная ошибка приложения */
     const APP_INTERNAL_ERROR = 1000;
 
-    const ERROR_MESSAGES = [
+    /** @var int Метод не найден */
+    const APP_METHOD_NOT_FOUND = 1001;
+
+    /** @var int Неподдерживаемый тип ответа */
+    const APP_UNSUPPORTED_RESPONSE_TYPE = 1002;
+
+    /** @var int Неподдерживаемый ответ */
+    const APP_UNSUPPORTED_RESPONSE = 1003;
+
+    const BASIC_ERROR_MESSAGES = [
         self::APP_INTERNAL_ERROR => 'An internal server error has occurred. Try again later',
+        self::APP_METHOD_NOT_FOUND => 'Requested method was not found',
+        self::APP_UNSUPPORTED_RESPONSE => 'Unsupported response: {content}',
+        self::APP_UNSUPPORTED_RESPONSE_TYPE => 'Unsupported response type: {class}'
     ];
+
+    const ERROR_MESSAGES = [];
 
     /**
      * @param int $code
@@ -20,20 +34,19 @@ class ErrorCodes
      * ['param' => 'My awesome param']
      * @return string
      */
-    public static function getText($code, $withCode = false, $params = [])
+    public static function getText(int $code, bool $withCode = false, array $params = []): string
     {
-        if ($text = static::ERROR_MESSAGES[$code] ?? null) {
-//            $text = Yii::t('app', $text);
-        } elseif (method_exists(static::class, $method = "text$code")) {
-            $text = static::$method();
-        }
+        $text = (static::ERROR_MESSAGES[$code] ?? static::BASIC_ERROR_MESSAGES[$code]) ?? '';
+
         if ($params) {
             $paramsPrepared = [];
             foreach ($params as $key => $value) {
                 $paramsPrepared['{' . $key . '}'] = $value;
             }
+
             $text = strtr($text, $paramsPrepared);
         }
+
         return $text ? (new Error($text, $code))->toString($withCode) : '';
     }
 }

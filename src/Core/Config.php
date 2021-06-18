@@ -21,5 +21,4 @@ class Config
      */
     public static $logLevel = 'debug';
     public static $logPath = '/var/log';
-
 }
