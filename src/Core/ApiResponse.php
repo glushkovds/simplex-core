@@ -47,7 +47,7 @@ class ApiResponse
         return $this;
     }
 
-    public function setError($code, $message = ''): self
+    public function setError($code, $message = null): self
     {
         $this->errorCode = $code;
         $this->errorMessage = $message ?? ErrorCodes::getText($code);
