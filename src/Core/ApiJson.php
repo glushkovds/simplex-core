@@ -18,12 +18,12 @@ class ApiJson extends ApiBase
                 $response = (new ApiResponse)->setError($e->getCode(), $e->getMessage());
             }
 
-            exit(json_encode($response->toArray()));
+            exit(json_encode($response->toArray(), JSON_UNESCAPED_UNICODE));
         }
 
         header("HTTP/1.0 404 Not Found");
 
         $response = (new ApiResponse)->setError(ErrorCodes::APP_METHOD_NOT_FOUND);
-        exit(json_encode($response->toArray()));
+        exit(json_encode($response->toArray(), JSON_UNESCAPED_UNICODE));
     }
 }
