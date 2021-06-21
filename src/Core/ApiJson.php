@@ -8,6 +8,7 @@ class ApiJson extends ApiBase
 {
     public function execute()
     {
+        parent::tryAuth();
         header('Content-Type: application/json');
 
         $method = 'action' . ucfirst(Core::uri(0) ?: 'index');

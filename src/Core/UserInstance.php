@@ -65,7 +65,7 @@ class UserInstance
         // Authorization for API, for authorize method
         if (!empty($GLOBALS[self::class]['login']) && !empty($GLOBALS[self::class]['password'])) {
             $q = "
-                    SELECT user_id, role_id, login, $this->dbHashName, r.name role_name
+                    SELECT user_id, role_id, login, password, $this->dbHashName, r.name role_name
                     FROM user u
                     JOIN user_role r USING(role_id)
                     WHERE login='" . DB::escape($GLOBALS[self::class]['login']) . "' AND u.active=1 AND r.active=1

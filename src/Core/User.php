@@ -146,8 +146,8 @@ class User
 
     public static function authorizeOnce($login, $password)
     {
-        $GLOBALS[self::class]['login'] = $login;
-        $GLOBALS[self::class]['password'] = $password;
+        $GLOBALS[UserInstance::class]['login'] = $login;
+        $GLOBALS[UserInstance::class]['password'] = $password;
         static::login();
     }
 
