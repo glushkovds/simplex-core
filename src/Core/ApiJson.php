@@ -14,7 +14,7 @@ class ApiJson extends ApiBase
         if ($method && method_exists($this, $method)) {
             try {
                 $response = ApiResponse::fromMixed($this->$method($_GET));
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $response = (new ApiResponse)->setError($e->getCode(), $e->getMessage());
             }
 
