@@ -61,12 +61,13 @@ abstract class Response
      * @param string $fileName File name
      * @param string $fileContent Content of the file
      */
-    public static function sendFile(string $fileName, string $fileContent)
+    public static function outputFile(string $fileName, string $fileContent)
     {
+        header('Content-Length: ' . strlen($fileContent));
         self::setContentType('application/octet-stream');
         self::setContentDisposition($fileName);
         echo $fileContent;
     }
 
-    public static abstract function output($data);
+    public abstract function output();
 }

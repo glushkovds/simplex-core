@@ -8,14 +8,12 @@ class Json extends Base
         parent::tryAuth();
 
         try {
-            // try executing the method
-            $data = $this->{$this->getMethodName()}();
+            $response = new JsonResponse($this->{$this->getMethodName()}());
         } catch (\Throwable $ex) {
-            // set data to exception instead
-            $data = $ex;
+            $response = new JsonResponse($ex);
         }
 
-        JsonResponse::output($data);
+        $response->output();
         exit;
     }
 }

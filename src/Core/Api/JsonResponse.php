@@ -11,28 +11,22 @@ class JsonResponse extends Response
     private $errorMessage = '';
     private $data = [];
 
-    /**
-     * Creates a Response object from input data
-     *
-     * @param mixed $mixed Input data
-     * @throws \Exception
-     * @return \Simplex\Core\Response
-     */
-    public static function fromMixed($mixed): Response
+    public function __construct($mixed)
     {
         if (is_scalar($mixed)) {
-            return (new static)->set('result', $mixed);
+            $this->set('result', $mixed);
+            return;
         }
 
         if (is_array($mixed)) {
-            $self = new static;
-            $self->data = $mixed;
-            return $self;
+            $this->data = $mixed;
+            return;
         }
 
         if (is_object($mixed)) {
-            if ($mixed instanceof self) {
-                return $mixed;
+            if ($mixed instanceof \Throwable) {
+                $this->setError($mixed);
+                return;
             }
 
             throw Error::byCode(ErrorCodes::APP_UNSUPPORTED_RESPONSE_TYPE, null, ['class' => get_class($mixed)]);
@@ -45,32 +39,10 @@ class JsonResponse extends Response
         );
     }
 
-    /**
-     * Creates a Response object from Throwable
-     *
-     * @param \Throwable $t Throwable exception
-     * @return \Simplex\Core\Response
-     */
-    public static function fromThrowable(\Throwable $t): Response
-    {
-        return (new static)->setError($t->getCode(), $t->getMessage());
-    }
-
-    /**
-     * Utility function to send a JSON
-     *
-     * @param \Simplex\Core\Response|\Throwable|mixed $data Response object, mixed data or Throwable
-     */
-    public static function output($data)
+    public function output()
     {
         self::setContentType('application/json');
-
-        try {
-            $data = self::fromMixed($data);
-            echo $data->toJson();
-        } catch (\Throwable $t) {
-            echo self::fromThrowable($t)->toJson();
-        }
+        echo json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 
     public function set($key, $value): self
@@ -79,10 +51,10 @@ class JsonResponse extends Response
         return $this;
     }
 
-    public function setError($code, $message = null): self
+    public function setError(\Throwable $err): self
     {
-        $this->errorCode = $code;
-        $this->errorMessage = $message ?? ErrorCodes::getText($code);
+        $this->errorCode = $err->getCode();
+        $this->errorMessage = $err->getMessage();
         return $this;
     }
 
@@ -94,10 +66,5 @@ class JsonResponse extends Response
                     'message' => $this->errorMessage,
                 ]
             ] + $this->data;
-    }
-
-    public function toJson(): string
-    {
-        return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 }
