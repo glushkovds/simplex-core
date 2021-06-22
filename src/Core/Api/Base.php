@@ -4,6 +4,7 @@ namespace Simplex\Core\Api;
 use Simplex\Core\Core;
 use Simplex\Core\Errors\Error;
 use Simplex\Core\Errors\ErrorCodes;
+use Simplex\Core\Response;
 use Simplex\Core\User;
 
 class Base
@@ -24,7 +25,7 @@ class Base
     {
         $name = 'action' . ucfirst(Core::uri(0) ?: 'index');
         if (!method_exists($this, $name)) {
-            header('HTTP/1.1 404 Not Found');
+            Response::setStatusCode('404 Not Found');
             throw Error::byCode(ErrorCodes::APP_METHOD_NOT_FOUND);
         }
 

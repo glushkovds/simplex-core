@@ -18,7 +18,7 @@ class Request
      */
     public static function isJson(): bool
     {
-        return isset($_SERVER['HTTP_CONTENT_TYPE']) && $_SERVER['HTTP_CONTENT_TYPE'] == 'application/json';
+        return ($_SERVER['HTTP_CONTENT_TYPE'] ?? null) == 'application/json';
     }
 
     /**
@@ -27,51 +27,51 @@ class Request
      */
     public static function isAjax(): bool
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
+        return ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? null) == 'XMLHttpRequest';
     }
 
     /**
      * Gets GET parameters
      *
      * @param mixed|null $k
-     * @return array|mixed
+     * @return array|mixed|null
      */
     public static function get($k = null)
     {
-        return $k ? $_GET[$k] : $_GET;
+        return $k ? ($_GET[$k] ?? null) : $_GET;
     }
 
     /**
      * Gets POST parameters
      *
      * @param mixed|null $k
-     * @return array|mixed
+     * @return array|mixed|null
      */
     public static function post($k = null)
     {
-        return $k ? $_POST[$k] : $_POST;
+        return $k ? ($_POST[$k] ?? null) : $_POST;
     }
 
     /**
      * Gets input cookies
      *
      * @param mixed|null $k
-     * @return array|mixed
+     * @return array|mixed|null
      */
     public static function cookie($k = null)
     {
-        return $k ? $_COOKIE[$k] : $_COOKIE;
+        return $k ? ($_COOKIE[$k] ?? null) : $_COOKIE;
     }
 
     /**
      * Gets input files
      *
-     * @param null $k
-     * @return array|mixed
+     * @param mixed|null $k
+     * @return array|mixed|null
      */
     public static function file($k = null)
     {
-        return $k ? $_FILES[$k] : $_FILES;
+        return $k ? ($_FILES[$k] ?? null) : $_FILES;
     }
 
     /**
@@ -81,6 +81,6 @@ class Request
      */
     public static function json(): array
     {
-        return json_decode(file_get_contents('php://input'), true);
+        return json_decode(file_get_contents('php://input'), true) ?? [];
     }
 }
