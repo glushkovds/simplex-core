@@ -14,7 +14,8 @@ class ApiJson extends ApiBase
         $method = 'action' . ucfirst(Core::uri(0) ?: 'index');
         if ($method && method_exists($this, $method)) {
             try {
-                $response = ApiResponse::fromMixed($this->$method($_GET));
+                $data = json_decode(file_get_contents('php://input'), true) + $_GET;
+                $response = ApiResponse::fromMixed($this->$method($data));
             } catch (\Throwable $e) {
                 $response = (new ApiResponse)->setError($e->getCode(), $e->getMessage());
             }

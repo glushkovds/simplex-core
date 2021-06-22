@@ -30,4 +30,9 @@ class ApiBase
              User::authorizeOnce($login, $pass);
         }
     }
+
+    protected function isPost(): bool
+    {
+        return $_SERVER['REQUEST_METHOD'] == 'POST';
+    }
 }
