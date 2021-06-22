@@ -13,7 +13,7 @@ class Response
     /**
      * @throws \Exception
      */
-    public static function fromMixed($mixed)
+    public static function fromMixed($mixed): Response
     {
         if (is_scalar($mixed)) {
             return (new static)->set('result', $mixed);
@@ -38,6 +38,11 @@ class Response
             null,
             ['content' => substr(var_export($mixed, true), 0, 200)]
         );
+    }
+
+    public static function fromThrowable(\Throwable $t): Response
+    {
+        return (new static)->setError($t->getCode(), $t->getMessage());
     }
 
     public function set($key, $value): self

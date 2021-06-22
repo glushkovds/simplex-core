@@ -11,7 +11,7 @@ class Json extends Base
         try {
             $response = Response::fromMixed($this->{$this->getMethodName()}());
         } catch (\Throwable $e) {
-            $response = (new Response)->setError($e->getCode(), $e->getMessage());
+            $response = Response::fromThrowable($e);
         }
 
         exit(json_encode($response->toArray(), JSON_UNESCAPED_UNICODE));
