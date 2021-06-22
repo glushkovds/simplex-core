@@ -9,7 +9,13 @@ class Json extends Base
     {
         parent::tryAuth();
 
-        Response::sendJson($this->{$this->getMethodName()}());
+        try {
+            $data = $this->{$this->getMethodName()}();
+        } catch (\Throwable $ex) {
+            $data = $ex;
+        }
+
+        Response::sendJson($data);
         exit;
     }
 }
