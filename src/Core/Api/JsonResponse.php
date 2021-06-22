@@ -8,9 +8,9 @@ use Simplex\Core\ResponseStatus;
 
 class JsonResponse extends Response
 {
-    private $errorCode = 0;
-    private $errorMessage = '';
-    private $data = [];
+    protected $errorCode = 0;
+    protected $errorMessage = '';
+    protected $data = [];
 
     /**
      * JsonResponse constructor.
@@ -18,6 +18,8 @@ class JsonResponse extends Response
      */
     public function __construct($mixed)
     {
+        parent::__construct();
+
         if (is_scalar($mixed)) {
             $this->set('result', $mixed);
             return;
@@ -44,10 +46,10 @@ class JsonResponse extends Response
         );
     }
 
-    public function output()
+    protected function makeBody(): string
     {
         self::setContentType('application/json');
-        echo json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
+        return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -72,7 +74,7 @@ class JsonResponse extends Response
     public function setError(\Throwable $err): self
     {
         if ($err->getCode() == ErrorCodes::APP_METHOD_NOT_FOUND) {
-            self::setStatusCode(ResponseStatus::NOT_FOUND);
+            $this->statusCode = 404;
         }
 
         $this->errorCode = $err->getCode();

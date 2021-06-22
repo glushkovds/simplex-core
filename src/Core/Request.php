@@ -3,31 +3,59 @@ namespace Simplex\Core;
 
 class Request
 {
+    protected $requestMethod;
+    protected $headers;
+    protected $getParams;
+    protected $postParams;
+    protected $cookies;
+    protected $files;
+    protected $requestBody;
+
+    /**
+     * Request constructor.
+     */
+    public function __construct()
+    {
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+        $this->getParams = $_GET;
+        $this->postParams = $_POST;
+        $this->cookies = $_COOKIE;
+        $this->files = $_FILES;
+        $this->requestBody = file_get_contents('php://input');
+
+        foreach ($_SERVER as $key => $value) {
+            if (strpos($key, 'HTTP_') == 0) {
+                // convert HTTP_X_X to x-x
+                $this->headers[strtolower(str_replace('_', '-', substr($key, 5)))] = $value;
+            }
+        }
+    }
+
     /**
      * Checks if the request was POST
      * @return bool
      */
-    public static function isPost(): bool
+    public function isPost(): bool
     {
-        return $_SERVER['REQUEST_METHOD'] == 'POST';
+        return $this->requestMethod == 'POST';
     }
 
     /**
      * Checks if the request body is JSON data
      * @return bool
      */
-    public static function isJson(): bool
+    public function isJson(): bool
     {
-        return ($_SERVER['HTTP_CONTENT_TYPE'] ?? null) == 'application/json';
+        return $this->header('Content-Type') == 'application/json';
     }
 
     /**
      * Checks if the request was AJAX
      * @return bool
      */
-    public static function isAjax(): bool
+    public function isAjax(): bool
     {
-        return ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? null) == 'XMLHttpRequest';
+        return $this->header('X-Requested-With') == 'XMLHttpRequest';
     }
 
     /**
@@ -36,9 +64,9 @@ class Request
      * @param mixed|null $k
      * @return array|mixed|null
      */
-    public static function get($k = null)
+    public function get($k = null)
     {
-        return $k ? ($_GET[$k] ?? null) : $_GET;
+        return $k ? ($this->getParams[$k] ?? null) : $this->getParams;
     }
 
     /**
@@ -47,9 +75,9 @@ class Request
      * @param mixed|null $k
      * @return array|mixed|null
      */
-    public static function post($k = null)
+    public function post($k = null)
     {
-        return $k ? ($_POST[$k] ?? null) : $_POST;
+        return $k ? ($this->postParams[$k] ?? null) : $this->postParams;
     }
 
     /**
@@ -58,9 +86,9 @@ class Request
      * @param mixed|null $k
      * @return array|mixed|null
      */
-    public static function cookie($k = null)
+    public function cookie($k = null)
     {
-        return $k ? ($_COOKIE[$k] ?? null) : $_COOKIE;
+        return $k ? ($this->cookies[$k] ?? null) : $this->cookies;
     }
 
     /**
@@ -69,18 +97,19 @@ class Request
      * @param mixed|null $k
      * @return array|mixed|null
      */
-    public static function file($k = null)
+    public function file($k = null)
     {
-        return $k ? ($_FILES[$k] ?? null) : $_FILES;
+        return $k ? ($this->files[$k] ?? null) : $this->files;
     }
 
     /**
-     * Gets JSON body parameters
+     * Returns input headers
      *
-     * @return array
+     * @param string|null $k
+     * @return mixed|null
      */
-    public static function json(): array
+    public function header(?string $k = null)
     {
-        return json_decode(file_get_contents('php://input'), true) ?: [];
+        return $k ? ($this->headers[strtolower($k)] ?? null) : $this->headers;
     }
 }

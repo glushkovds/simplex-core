@@ -1,19 +1,25 @@
 <?php
 namespace Simplex\Core;
 
-use Simplex\Core\Errors\Error;
-use Simplex\Core\Errors\ErrorCodes;
-
 abstract class Response
 {
-    /**
-     * Sends Location cookie and terminates execution
-     * @param string $url URL to redirect to
-     */
-    public static function redirect(string $url)
+    protected $statusCode = 200;
+    protected $cookies = [];
+    protected $headers = [];
+
+    public function __construct()
     {
-        header('Location: ' . $url);
-        exit;
+    }
+
+    /**
+     * Sets redirect url
+     * @param string $url URL to redirect to
+     * @return self
+     */
+    public function redirect(string $url): self
+    {
+        $this->setHeader('Location', $url);
+        return $this;
     }
 
     /**
@@ -22,37 +28,62 @@ abstract class Response
      * @param string $name Name
      * @param string $value Value
      * @param array $options Options
+     * @return self
      */
-    public static function setCookie(string $name, string $value = '', array $options = [])
+    public function setCookie(string $name, string $value = '', array $options = []): self
     {
-        setcookie($name, $value, $options);
+        $this->cookies[$name] = [
+            'value' => $value,
+            'options' => $options
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Sets the header
+     *
+     * @param string $name Name
+     * @param string $value Value
+     * @return $this
+     */
+    public function setHeader(string $name, string $value): self
+    {
+        $this->headers[$name] = $value;
+        return $this;
     }
 
     /**
      * Sends a header with status code
-     * @param string $code Status code string
+     * @param int $code Status code string
+     * @return self
      */
-    public static function setStatusCode(string $code)
+    public function setStatusCode(int $code): self
     {
-        header('HTTP/1.1 ' . $code);
+        $this->statusCode = $code;
+        return $this;
     }
 
     /**
      * Sets the content type
      * @param string $contentType Content type
+     * @return self
      */
-    public static function setContentType(string $contentType)
+    public function setContentType(string $contentType): self
     {
-        header('Content-Type: ' . $contentType);
+        $this->setHeader('Content-Type', $contentType);
+        return $this;
     }
 
     /**
      * Sets the content disposition header
      * @param string $fileName File name
+     * @return self
      */
-    public static function setContentDisposition(string $fileName)
+    public function setContentDisposition(string $fileName): self
     {
-        header('Content-Disposition: attachment; filename=' . $fileName);
+        $this->setHeader('Content-Disposition', 'attachment; filename=' . $fileName);
+        return $this;
     }
 
     /**
@@ -61,13 +92,35 @@ abstract class Response
      * @param string $fileName File name
      * @param string $fileContent Content of the file
      */
-    public static function outputFile(string $fileName, string $fileContent)
+    public function outputFile(string $fileName, string $fileContent)
     {
+        $this->outputHeaders();
+
         header('Content-Length: ' . strlen($fileContent));
-        self::setContentType('application/octet-stream');
-        self::setContentDisposition($fileName);
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: ' . $fileName);
+
         echo $fileContent;
     }
 
-    public abstract function output();
+    public function output()
+    {
+        $this->outputHeaders();
+        echo $this->makeBody();
+    }
+
+    private function outputHeaders()
+    {
+        http_response_code($this->statusCode);
+
+        foreach ($this->cookies as $cookieName => $cookie) {
+            setcookie($cookieName, $cookie['value'], $cookie['options']);
+        }
+
+        foreach ($this->headers as $header => $value) {
+            header($header . ': ' . $value);
+        }
+    }
+
+    protected abstract function makeBody(): string;
 }
