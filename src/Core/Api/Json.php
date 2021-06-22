@@ -1,8 +1,6 @@
 <?php
 namespace Simplex\Core\Api;
 
-use Simplex\Core\Response;
-
 class Json extends Base
 {
     public function execute()
@@ -10,12 +8,14 @@ class Json extends Base
         parent::tryAuth();
 
         try {
+            // try executing the method
             $data = $this->{$this->getMethodName()}();
         } catch (\Throwable $ex) {
+            // set data to exception instead
             $data = $ex;
         }
 
-        Response::sendJson($data);
+        JsonResponse::output($data);
         exit;
     }
 }

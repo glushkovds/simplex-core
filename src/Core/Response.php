@@ -4,57 +4,8 @@ namespace Simplex\Core;
 use Simplex\Core\Errors\Error;
 use Simplex\Core\Errors\ErrorCodes;
 
-class Response
+abstract class Response
 {
-    protected $errorCode = 0;
-    protected $errorMessage = '';
-    protected $data = [];
-
-    /**
-     * Creates a Response object from input data
-     *
-     * @param mixed $mixed Input data
-     * @throws \Exception
-     * @return \Simplex\Core\Response
-     */
-    public static function fromMixed($mixed): Response
-    {
-        if (is_scalar($mixed)) {
-            return (new static)->set('result', $mixed);
-        }
-
-        if (is_array($mixed)) {
-            $self = new static;
-            $self->data = $mixed;
-            return $self;
-        }
-
-        if (is_object($mixed)) {
-            if ($mixed instanceof self) {
-                return $mixed;
-            }
-
-            throw Error::byCode(ErrorCodes::APP_UNSUPPORTED_RESPONSE_TYPE, null, ['class' => get_class($mixed)]);
-        }
-
-        throw Error::byCode(
-            ErrorCodes::APP_UNSUPPORTED_RESPONSE,
-            null,
-            ['content' => substr(var_export($mixed, true), 0, 200)]
-        );
-    }
-
-    /**
-     * Creates a Response object from Throwable
-     *
-     * @param \Throwable $t Throwable exception
-     * @return \Simplex\Core\Response
-     */
-    public static function fromThrowable(\Throwable $t): Response
-    {
-        return (new static)->setError($t->getCode(), $t->getMessage());
-    }
-
     /**
      * Sends Location cookie and terminates execution
      * @param string $url URL to redirect to
@@ -112,62 +63,10 @@ class Response
      */
     public static function sendFile(string $fileName, string $fileContent)
     {
+        self::setContentType('application/octet-stream');
         self::setContentDisposition($fileName);
         echo $fileContent;
     }
 
-    /**
-     * Utility function to send a JSON
-     *
-     * @param \Simplex\Core\Response|\Throwable|mixed $data Response object, mixed data or Throwable
-     */
-    public static function sendJson($data)
-    {
-        self::setContentType('application/json');
-
-        if ($data instanceof self) {
-            echo $data->toJson();
-            return;
-        }
-
-        try {
-            $data = self::fromMixed($data);
-            echo $data->toJson();
-            return;
-        } catch (\Throwable $t) {
-            $data = $t;
-        }
-
-        if ($data instanceof \Throwable) {
-            echo self::fromThrowable($data)->toJson();
-        }
-    }
-
-    public function set($key, $value): self
-    {
-        $this->data[$key] = $value;
-        return $this;
-    }
-
-    public function setError($code, $message = null): self
-    {
-        $this->errorCode = $code;
-        $this->errorMessage = $message ?? ErrorCodes::getText($code);
-        return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-                'error' => [
-                    'code' => $this->errorCode,
-                    'message' => $this->errorMessage,
-                ]
-            ] + $this->data;
-    }
-
-    public function toJson(): string
-    {
-        return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
-    }
+    public static abstract function output($data);
 }
