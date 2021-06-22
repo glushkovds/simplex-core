@@ -25,7 +25,6 @@ class Base
     {
         $name = 'action' . ucfirst(Core::uri(0) ?: 'index');
         if (!method_exists($this, $name)) {
-            Response::setStatusCode('404 Not Found');
             throw Error::byCode(ErrorCodes::APP_METHOD_NOT_FOUND);
         }
 

@@ -5,7 +5,7 @@ class Json extends Base
 {
     public function execute()
     {
-        parent::tryAuth();
+        static::tryAuth();
 
         try {
             $response = new JsonResponse($this->{$this->getMethodName()}());

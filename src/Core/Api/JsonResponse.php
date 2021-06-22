@@ -4,6 +4,7 @@ namespace Simplex\Core\Api;
 use Simplex\Core\Errors\Error;
 use Simplex\Core\Errors\ErrorCodes;
 use Simplex\Core\Response;
+use Simplex\Core\ResponseStatus;
 
 class JsonResponse extends Response
 {
@@ -11,6 +12,10 @@ class JsonResponse extends Response
     private $errorMessage = '';
     private $data = [];
 
+    /**
+     * JsonResponse constructor.
+     * @param mixed $mixed Input scalar type, associative array or Throwable
+     */
     public function __construct($mixed)
     {
         if (is_scalar($mixed)) {
@@ -45,19 +50,41 @@ class JsonResponse extends Response
         echo json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * Sets value in data by key
+     *
+     * @param mixed $key Key
+     * @param mixed $value Value
+     * @return $this
+     */
     public function set($key, $value): self
     {
         $this->data[$key] = $value;
         return $this;
     }
 
+    /**
+     * Sets error from throwable
+     *
+     * @param \Throwable $err Throwable to set from
+     * @return $this
+     */
     public function setError(\Throwable $err): self
     {
+        if ($err->getCode() == ErrorCodes::APP_METHOD_NOT_FOUND) {
+            self::setStatusCode(ResponseStatus::NOT_FOUND);
+        }
+
         $this->errorCode = $err->getCode();
         $this->errorMessage = $err->getMessage();
         return $this;
     }
 
+    /**
+     * Returns array with current error and data
+     *
+     * @return array|array[]
+     */
     public function toArray(): array
     {
         return [
