@@ -1,11 +1,10 @@
 <?php
-
-namespace Simplex\Core;
+namespace Simplex\Core\Api;
 
 use Simplex\Core\Errors\Error;
 use Simplex\Core\Errors\ErrorCodes;
 
-class ApiResponse
+class Response
 {
     protected $errorCode = 0;
     protected $errorMessage = '';
