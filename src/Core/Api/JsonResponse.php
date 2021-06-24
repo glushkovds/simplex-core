@@ -48,7 +48,7 @@ class JsonResponse extends Response
 
     protected function makeBody(): string
     {
-        self::setContentType('application/json');
+        $this->setContentType('application/json');
         return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 
