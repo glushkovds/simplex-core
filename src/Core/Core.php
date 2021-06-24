@@ -38,6 +38,7 @@ class Core
             exit;
         }
 
+        // TODO: change this to Request::isAjax()
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             self::$ajax = true;
             self::$content_only = true;
@@ -77,6 +78,10 @@ class Core
         }
     }
 
+    /**
+     * @deprecated use Request::isAjax() instead
+     * @return bool
+     */
     public static function ajax()
     {
         return self::$ajax;
