@@ -109,7 +109,7 @@ abstract class Response
         echo $this->makeBody();
     }
 
-    private function outputHeaders()
+    protected function outputHeaders()
     {
         http_response_code($this->statusCode);
 
