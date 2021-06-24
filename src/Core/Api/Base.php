@@ -12,7 +12,13 @@ class Base
     public function execute()
     {
         $this->tryAuth();
-        return $this->{$this->getMethodName()}();
+
+        try {
+            return $this->{$this->getMethodName()}();
+        } catch (\Throwable $ex) {
+            http_response_code(404);
+            return $ex->getCode() . ' ' . $ex->getMessage();
+        }
     }
 
     /**
