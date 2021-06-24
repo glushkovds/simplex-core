@@ -19,6 +19,7 @@ class JsonResponse extends Response
     public function __construct($mixed)
     {
         parent::__construct();
+        $this->setContentType('application/json');
 
         if (is_scalar($mixed)) {
             $this->set('result', $mixed);
@@ -48,7 +49,6 @@ class JsonResponse extends Response
 
     protected function makeBody(): string
     {
-        $this->setContentType('application/json');
         return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 
