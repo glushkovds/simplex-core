@@ -17,11 +17,15 @@ class ErrorCodes
     /** @var int Неподдерживаемый ответ */
     const APP_UNSUPPORTED_RESPONSE = 1003;
 
+    /** @var int Не авторизован */
+    const APP_UNAUTHORIZED = 1004;
+
     const BASIC_ERROR_MESSAGES = [
         self::APP_INTERNAL_ERROR => 'An internal server error has occurred. Try again later',
         self::APP_METHOD_NOT_FOUND => 'Requested method was not found',
         self::APP_UNSUPPORTED_RESPONSE => 'Unsupported response: {content}',
-        self::APP_UNSUPPORTED_RESPONSE_TYPE => 'Unsupported response type: {class}'
+        self::APP_UNSUPPORTED_RESPONSE_TYPE => 'Unsupported response type: {class}',
+        self::APP_UNAUTHORIZED => 'Unauthorized'
     ];
 
     const ERROR_MESSAGES = [];

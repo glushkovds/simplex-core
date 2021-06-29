@@ -9,9 +9,19 @@ use Simplex\Core\User;
 
 class Base
 {
+    /**
+     * @var bool Should require authentication on all methods?
+     */
+    protected $requireAuth = false;
+
     public function execute()
     {
         $this->tryAuth();
+
+        if (!$this->isAuthenticated() && $this->requireAuth) {
+            http_response_code(403);
+            return 'Unauthorized';
+        }
 
         try {
             return $this->{$this->getMethodName()}();
@@ -48,5 +58,10 @@ class Base
             $pass = $_SERVER['PHP_AUTH_PW'] ?? '';
             User::authorizeOnce($login, $pass);
         }
+    }
+
+    protected function isAuthenticated(): bool
+    {
+        return User::$id != 0;
     }
 }
