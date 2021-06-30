@@ -9,7 +9,7 @@ class Json extends Base
     public function execute()
     {
         try {
-            static::tryAuth();
+            static::auth();
             $response = new JsonResponse($this->{$this->getMethodName()}());
         } catch (\Throwable $ex) {
             $response = new JsonResponse($ex);

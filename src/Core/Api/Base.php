@@ -17,7 +17,7 @@ class Base
     public function execute()
     {
         try {
-            $this->tryAuth();
+            $this->auth();
             return $this->{$this->getMethodName()}();
         } catch (\Throwable $ex) {
             http_response_code(404);
@@ -41,7 +41,7 @@ class Base
         return $name;
     }
 
-    protected function tryAuth()
+    protected function auth()
     {
         static::tryAuthBasic();
 
