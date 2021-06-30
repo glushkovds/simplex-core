@@ -8,13 +8,8 @@ class Json extends Base
 {
     public function execute()
     {
-        static::tryAuth();
-
         try {
-            if (!$this->isAuthenticated() && $this->requireAuth) {
-                throw Error::byCode(ErrorCodes::APP_UNAUTHORIZED);
-            }
-
+            static::tryAuth();
             $response = new JsonResponse($this->{$this->getMethodName()}());
         } catch (\Throwable $ex) {
             $response = new JsonResponse($ex);

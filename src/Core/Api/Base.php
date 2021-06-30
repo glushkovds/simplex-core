@@ -16,14 +16,8 @@ class Base
 
     public function execute()
     {
-        $this->tryAuth();
-
-        if (!$this->isAuthenticated() && $this->requireAuth) {
-            http_response_code(403);
-            return 'Unauthorized';
-        }
-
         try {
+            $this->tryAuth();
             return $this->{$this->getMethodName()}();
         } catch (\Throwable $ex) {
             http_response_code(404);
@@ -50,6 +44,10 @@ class Base
     protected function tryAuth()
     {
         static::tryAuthBasic();
+
+        if (!User::$id && $this->requireAuth) {
+            throw Error::byCode(ErrorCodes::APP_UNAUTHORIZED);
+        }
     }
 
     protected function tryAuthBasic()
@@ -58,10 +56,5 @@ class Base
             $pass = $_SERVER['PHP_AUTH_PW'] ?? '';
             User::authorizeOnce($login, $pass);
         }
-    }
-
-    protected function isAuthenticated(): bool
-    {
-        return User::$id != 0;
     }
 }
