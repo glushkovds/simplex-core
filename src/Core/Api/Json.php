@@ -3,14 +3,16 @@ namespace Simplex\Core\Api;
 
 class Json extends Base
 {
-    public function execute()
+    public function execute(): string
     {
-        static::tryAuth();
+        $request = new JsonRequest();
+        $response = new JsonResponse();
 
         try {
-            $response = new JsonResponse($this->{$this->getMethodName()}());
+            static::auth();
+            $response->setData($this->{$this->getMethodName()}($request, $response));
         } catch (\Throwable $ex) {
-            $response = new JsonResponse($ex);
+            $response->setError($ex);
         }
 
         $response->output();

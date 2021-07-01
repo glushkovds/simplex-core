@@ -7,19 +7,17 @@ use Simplex\Core\Errors\ErrorCodes;
 use Simplex\Core\Response;
 use Simplex\Core\User;
 
-class Base
+abstract class Base
 {
-    public function execute()
-    {
-        $this->tryAuth();
+    /**
+     * @var bool Should require authentication on all methods?
+     */
+    protected $requireAuth = false;
 
-        try {
-            return $this->{$this->getMethodName()}();
-        } catch (\Throwable $ex) {
-            http_response_code(404);
-            return $ex->getCode() . ' ' . $ex->getMessage();
-        }
-    }
+    /**
+     * @return string
+     */
+    public abstract function execute(): string;
 
     /**
      * Gets name of the method to execute
@@ -37,9 +35,13 @@ class Base
         return $name;
     }
 
-    protected function tryAuth()
+    protected function auth()
     {
         static::tryAuthBasic();
+
+        if (!User::$id && $this->requireAuth) {
+            throw Error::byCode(ErrorCodes::APP_UNAUTHORIZED);
+        }
     }
 
     protected function tryAuthBasic()
