@@ -13,17 +13,11 @@ class JsonResponse extends Response
 
     /**
      * JsonResponse constructor.
-     * @param mixed $mixed Input scalar type, associative array or Throwable
      */
-    public function __construct($mixed = null)
+    public function __construct()
     {
         parent::__construct();
         $this->setContentType('application/json');
-
-        // set data if mixed isn't null
-        if ($mixed !== null) {
-            $this->setData($mixed);
-        }
     }
 
     /**

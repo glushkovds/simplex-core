@@ -14,7 +14,10 @@ abstract class Base
      */
     protected $requireAuth = false;
 
-    public abstract function execute();
+    /**
+     * @return string
+     */
+    public abstract function execute(): string;
 
     /**
      * Gets name of the method to execute

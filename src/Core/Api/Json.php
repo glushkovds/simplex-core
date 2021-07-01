@@ -3,7 +3,7 @@ namespace Simplex\Core\Api;
 
 class Json extends Base
 {
-    public function execute()
+    public function execute(): string
     {
         $request = new JsonRequest();
         $response = new JsonResponse();
