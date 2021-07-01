@@ -7,23 +7,14 @@ use Simplex\Core\Errors\ErrorCodes;
 use Simplex\Core\Response;
 use Simplex\Core\User;
 
-class Base
+abstract class Base
 {
     /**
      * @var bool Should require authentication on all methods?
      */
     protected $requireAuth = false;
 
-    public function execute()
-    {
-        try {
-            $this->auth();
-            return $this->{$this->getMethodName()}();
-        } catch (\Throwable $ex) {
-            http_response_code(404);
-            return $ex->getCode() . ' ' . $ex->getMessage();
-        }
-    }
+    public abstract function execute();
 
     /**
      * Gets name of the method to execute

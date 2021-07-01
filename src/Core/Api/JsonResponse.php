@@ -4,7 +4,6 @@ namespace Simplex\Core\Api;
 use Simplex\Core\Errors\Error;
 use Simplex\Core\Errors\ErrorCodes;
 use Simplex\Core\Response;
-use Simplex\Core\ResponseStatus;
 
 class JsonResponse extends Response
 {
@@ -16,25 +15,42 @@ class JsonResponse extends Response
      * JsonResponse constructor.
      * @param mixed $mixed Input scalar type, associative array or Throwable
      */
-    public function __construct($mixed)
+    public function __construct($mixed = null)
     {
         parent::__construct();
         $this->setContentType('application/json');
 
+        // set data if mixed isn't null
+        if ($mixed !== null) {
+            $this->setData($mixed);
+        }
+    }
+
+    /**
+     * @param mixed $mixed Input scalar type, associative array or Throwable
+     * @throws \Simplex\Core\Errors\Error
+     */
+    public function setData($mixed): self
+    {
         if (is_scalar($mixed)) {
             $this->set('result', $mixed);
-            return;
+            return $this;
         }
 
         if (is_array($mixed)) {
             $this->data = $mixed;
-            return;
+            return $this;
         }
 
         if (is_object($mixed)) {
             if ($mixed instanceof \Throwable) {
                 $this->setError($mixed);
-                return;
+                return $this;
+            }
+
+            if (method_exists($mixed, 'toArray')) {
+                $this->data = $mixed->toArray();
+                return $this;
             }
 
             throw Error::byCode(ErrorCodes::APP_UNSUPPORTED_RESPONSE_TYPE, null, ['class' => get_class($mixed)]);
@@ -73,8 +89,9 @@ class JsonResponse extends Response
      */
     public function setError(\Throwable $err): self
     {
-        if ($err->getCode() == ErrorCodes::APP_METHOD_NOT_FOUND) {
-            $this->statusCode = 404;
+        // override status code if it wasn't set to other one yet
+        if ($this->statusCode == 200) {
+            $this->statusCode = ErrorCodes::getHttpStatusCode($err->getCode()) ?? 500;
         }
 
         $this->errorCode = $err->getCode();

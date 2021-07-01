@@ -1,18 +1,18 @@
 <?php
 namespace Simplex\Core\Api;
 
-use Simplex\Core\Errors\Error;
-use Simplex\Core\Errors\ErrorCodes;
-
 class Json extends Base
 {
     public function execute()
     {
+        $request = new JsonRequest();
+        $response = new JsonResponse();
+
         try {
             static::auth();
-            $response = new JsonResponse($this->{$this->getMethodName()}());
+            $response->setData($this->{$this->getMethodName()}($request, $response));
         } catch (\Throwable $ex) {
-            $response = new JsonResponse($ex);
+            $response->setError($ex);
         }
 
         $response->output();

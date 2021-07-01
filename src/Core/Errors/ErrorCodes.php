@@ -28,7 +28,13 @@ class ErrorCodes
         self::APP_UNAUTHORIZED => 'Unauthorized'
     ];
 
+    const BASIC_ERROR_HTTP_CODES = [
+        self::APP_METHOD_NOT_FOUND => 404,
+        self::APP_UNAUTHORIZED => 403
+    ];
+
     const ERROR_MESSAGES = [];
+    const ERROR_HTTP_CODES = [];
 
     /**
      * @param int $code
@@ -40,7 +46,7 @@ class ErrorCodes
      */
     public static function getText(int $code, bool $withCode = false, array $params = []): string
     {
-        $text = (static::ERROR_MESSAGES[$code] ?? static::BASIC_ERROR_MESSAGES[$code]) ?? '';
+        $text = static::ERROR_MESSAGES[$code] ?? static::BASIC_ERROR_MESSAGES[$code] ?? '';
 
         if ($params) {
             $paramsPrepared = [];
@@ -52,5 +58,15 @@ class ErrorCodes
         }
 
         return $text ? (new Error($text, $code))->toString($withCode) : '';
+    }
+
+    /**
+     * Returns HTTP status code for an error code or null if it should fall back
+     * @param int $code Error code
+     * @return int|null Output HTTP status code
+     */
+    public static function getHttpStatusCode(int $code): ?int
+    {
+        return static::BASIC_ERROR_HTTP_CODES[$code] ?? static::ERROR_HTTP_CODES[$code] ?? null;
     }
 }
