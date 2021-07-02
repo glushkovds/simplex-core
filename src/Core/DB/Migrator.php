@@ -42,7 +42,7 @@ class Migrator extends ConsoleBase
         foreach ($list as $item) {
             $migrations[] = $item['file'];
         }
-        
+
         return array_diff($files, $migrations);
     }
 
@@ -89,7 +89,7 @@ class Migrator extends ConsoleBase
                     break;
                 }
             }
-            
+
             // run and remember the migration
             $class = $this->getMigrationObject($migration);
             if (!$class) {
@@ -127,8 +127,9 @@ class Migrator extends ConsoleBase
         $list = Migration::findAdv()
             ->orderBy('`id` DESC');
 
-        if ($steps != 'all')
+        if ($steps != 'all') {
             $list->limit((int)$steps);
+        }
 
         $list = $list->all();
 
