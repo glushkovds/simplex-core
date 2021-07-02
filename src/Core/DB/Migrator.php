@@ -2,9 +2,12 @@
 
 namespace Simplex\Core\DB;
 
+use ReflectionClass;
 use Simplex\Core\Alert\Console\Alert;
 use Simplex\Core\ConsoleBase;
 use Simplex\Core\DB;
+use Simplex\Core\DB\Migration as MigrationInterface;
+use Simplex\Core\Models\Migration as Migration;
 
 class Migrator extends ConsoleBase
 {
@@ -15,7 +18,7 @@ class Migrator extends ConsoleBase
         // populate migration files
         foreach (scandir('database/migrations') as $file) {
             $path = pathinfo($file);
-            if ($path['extension'] ?? '' == 'php') {
+            if (($path['extension'] ?? '') == 'php') {
                 $this->migrationFiles[$path['filename']] = [
                     'file' => 'database/migrations/' . $file,
                     'name' => $path['filename']
@@ -43,6 +46,24 @@ class Migrator extends ConsoleBase
         return array_diff($files, $migrations);
     }
 
+    protected function getMigrationObject(string $name): ?MigrationInterface
+    {
+        try {
+            $class = include $this->migrationFiles[$name]['file'];
+
+            $reflection = new ReflectionClass($class);
+            if (!$reflection->implementsInterface(MigrationInterface::class)) {
+                Alert::error('Migration ' . $name . ' should implement Migration interface');
+                return null;
+            }
+
+            return $class;
+        } catch (\Throwable $ex) {
+            Alert::error('FATAL: ' . $ex->getMessage());
+            return null;
+        }
+    }
+
     /**
      * @param int|string $steps
      * @throws \Exception
@@ -50,10 +71,8 @@ class Migrator extends ConsoleBase
     public function up($steps = 'all')
     {
         // find migrations that were not processed yet
-        $list = (new AQ())
-            ->from('migration')
+        $list = Migration::findAdv()
             ->asArray()
-            ->select('*')
             ->all();
 
         $migrations = $this->getNewMigrations($list);
@@ -72,11 +91,25 @@ class Migrator extends ConsoleBase
             }
             
             // run and remember the migration
-            /** @var \Simplex\Core\DB\Migration $class */
-            $class = include $this->migrationFiles[$migration]['file'];
-            if (!$class->up() || !DB::query('INSERT INTO `migration` (`file`) VALUES (?)', [$migration])) {
+            $class = $this->getMigrationObject($migration);
+            if (!$class) {
+                return;
+            }
+
+            if (!$class->up()) {
                 Alert::error('Failed to up migration ' . $migration);
-                continue;
+                return;
+            }
+
+            $dbMigration = new Migration();
+            if (!$dbMigration->insert(['file' => $migration])) {
+                if (!$class->down()) {
+                    Alert::error('FATAL: failed to down migration ' . $migration . ' after DB failure');
+                    return;
+                }
+
+                Alert::error('Failed to remember migration ' . $migration);
+                return;
             }
 
             Alert::text('Migration ' . $migration . ' is up!');
@@ -91,24 +124,34 @@ class Migrator extends ConsoleBase
      */
     public function down($steps = 1)
     {
-        $list = (new AQ())
-            ->from('migration')
-            ->select('*')
-            ->orderBy('id DESC')
-            ->asArray();
+        $list = Migration::findAdv()
+            ->orderBy('`id` DESC');
 
-        if ($steps !== 'all')
-            $list->limit($steps);
+        if ($steps != 'all')
+            $list->limit((int)$steps);
 
         $list = $list->all();
 
+        /** @var Migration $migration */
         foreach ($list as $migration) {
-            // run migration
-            /** @var \Simplex\Core\DB\Migration $class */
-            $class = include $this->migrationFiles[$migration['file']]['file'];
-            if (!$class->down() || !DB::query('DELETE FROM `migration` WHERE `id` = ?', [$migration['id']])) {
+            $class = $this->getMigrationObject($migration->file);
+            if (!$class) {
+                return;
+            }
+
+            if (!$class->down()) {
                 Alert::error('Failed to down migration ' . $migration['file']);
-                continue;
+                return;
+            }
+
+            if (!$migration->delete()) {
+                if (!$class->up()) {
+                    Alert::error('FATAL: Failed to up migration ' . $migration['file'] . 'after DB failure');
+                    return;
+                }
+
+                Alert::error('Failed to forget migration ' . $migration['file']);
+                return;
             }
 
             Alert::text('Migration ' . $migration['file'] . ' is down!');
