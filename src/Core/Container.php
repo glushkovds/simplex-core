@@ -11,6 +11,8 @@ namespace Simplex\Core;
  * @method static Page getPage
  * @method static Core getCore
  * @method static User getUser
+ * @method static \Simplex\Core\Request getRequest
+ * @method static \Simplex\Core\Response getResponse
  */
 class Container
 {
