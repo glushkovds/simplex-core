@@ -10,12 +10,15 @@ class Request
     protected $cookies;
     protected $files;
     protected $requestBody;
+    protected $urlPath;
+    protected $urlParts;
 
     /**
      * Request constructor.
      */
     public function __construct()
     {
+        // cache values
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->getParams = $_GET;
         $this->postParams = $_POST;
@@ -24,11 +27,34 @@ class Request
         $this->requestBody = file_get_contents('php://input');
 
         foreach ($_SERVER as $key => $value) {
-            if (strpos($key, 'HTTP_') == 0) {
+            if (strpos($key, 'HTTP_') === 0) {
                 // convert HTTP_X_X to x-x
                 $this->headers[strtolower(str_replace('_', '-', substr($key, 5)))] = $value;
             }
         }
+
+        // parse and compose URL
+        $urlData = parse_url($_SERVER['REQUEST_URI']);
+        $this->urlPath = $urlData['path'];
+        $this->urlParts = array_slice(explode('/', $this->urlParts), 1);
+    }
+
+    /**
+     * Returns full URL path
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->urlPath;
+    }
+
+    /**
+     * Returns broken down URL parts
+     * @return array
+     */
+    public function getUrlParts(): array
+    {
+        return $this->urlParts;
     }
 
     /**

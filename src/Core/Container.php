@@ -29,6 +29,11 @@ class Container
         return static::$registry[$name] ?? null;
     }
 
+    public static function isSet(string $name): bool
+    {
+        return isset(static::$registry[$name]);
+    }
+
     public static function __callStatic($name, $arguments)
     {
         if (strpos($name, 'get') === 0) {
