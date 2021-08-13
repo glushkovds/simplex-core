@@ -11,6 +11,8 @@ namespace Simplex\Core;
  * @method static Page getPage
  * @method static Core getCore
  * @method static User getUser
+ * @method static \Simplex\Core\Request getRequest
+ * @method static \Simplex\Core\Response getResponse
  */
 class Container
 {
@@ -25,6 +27,11 @@ class Container
     public static function get(string $name)
     {
         return static::$registry[$name] ?? null;
+    }
+
+    public static function isSet(string $name): bool
+    {
+        return isset(static::$registry[$name]);
     }
 
     public static function __callStatic($name, $arguments)

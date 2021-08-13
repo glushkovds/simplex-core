@@ -2,6 +2,9 @@
 
 namespace Simplex\Core;
 
+use Simplex\Core\Html\HtmlRequest;
+use Simplex\Core\Html\HtmlResponse;
+
 class Core
 {
     private static $ajax = false;
@@ -24,22 +27,22 @@ class Core
 
     public static function init()
     {
-        $url_info = parse_url($_SERVER['REQUEST_URI']);
-        self::$path = $url_info['path'];
-        self::$uri = array_slice(explode('/', self::$path), 1);
-
-        // TODO: get rid of deprecated code
-        DB::bind(array('SITE_PATH' => self::$path, 'SITE_LINK' => $url_info['path'] . (isset($url_info['query']) ? '?' . $url_info['query'] : '')));
-
-        if (!empty($_REQUEST['sf_plug_name'])) {
-            $plug = 'Plug' . ucfirst(DB::escape($_REQUEST['sf_plug_name']));
-            $method = empty($_REQUEST['sf_plug_method']) ? 'execute' : DB::escape($_REQUEST['sf_plug_method']);
-            $plug::$method();
-            exit;
+        // if request or response wasn't set, we still have to construct them
+        // useful for backwards compatibility
+        if (!Container::isSet('request')) {
+            Container::set('request', new HtmlRequest());
         }
 
-        // TODO: change this to Request::isAjax()
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        if (!Container::isSet('response')) {
+            Container::set('response', new HtmlResponse());
+        }
+
+        $request = Container::getRequest();
+
+        // TODO: get rid of deprecated code
+        DB::bind(['SITE_PATH' => $request->getPath(), 'SITE_LINK' => $request->getPath()]);
+
+        if ($request->isAjax()) {
             self::$ajax = true;
             self::$content_only = true;
             $sf_module_id = isset($_REQUEST['sf_module_id']) ? (int)$_REQUEST['sf_module_id'] : 0;
