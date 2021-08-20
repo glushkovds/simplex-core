@@ -97,6 +97,11 @@ class Migrator extends ConsoleBase
             }
 
             if (!$class->up()) {
+                if (!$class->down()) {
+                    Alert::error('FATAL: failed to down migration ' . $migration . ' after up failure');
+                    return;
+                }
+
                 Alert::error('Failed to up migration ' . $migration);
                 return;
             }
@@ -141,6 +146,11 @@ class Migrator extends ConsoleBase
             }
 
             if (!$class->down()) {
+                if (!$class->up()) {
+                    Alert::error('FATAL: Failed to up migration ' . $migration['file'] . 'after down failure');
+                    return;
+                }
+
                 Alert::error('Failed to down migration ' . $migration['file']);
                 return;
             }
