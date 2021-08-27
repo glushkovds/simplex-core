@@ -87,31 +87,53 @@ class Core
      */
     public static function ajax()
     {
-        return self::$ajax;
+        return Container::getRequest()->isAjax();
     }
 
+    /**
+     * @deprecated use Request::getUrlParts() instead
+     * @param false $i
+     * @return array|mixed|string
+     */
     public static function uri($i = false)
     {
+        $uri = Container::getRequest()->getUrlParts();
+
         if ($i === false) {
-            return self::$uri;
+            return $uri;
         }
+
         $i += self::$component_level;
-        return self::$uri[$i] ?? '';
+        return $uri[$i] ?? '';
     }
 
+    /**
+     * @deprecated use Request::getUrlParts() instead
+     * @param $i
+     * @return mixed|string
+     */
     public static function uri_r($i)
     {
-        $i = count(self::$uri) - 2 - $i;;
-        return self::$uri[$i] ?? '';
+        $uri = Container::getRequest()->getUrlParts();
+
+        $i = count($uri) - 2 - $i;;
+        return $uri[$i] ?? '';
     }
 
+    /**
+     * @deprecated use Request::getPath() instead
+     * @param int $beg
+     * @param int $len
+     * @return array|string|string[]
+     */
     public static function path($beg = 0, $len = 0)
     {
-        $path = self::$path;
+        $path = Container::getRequest()->getPath();
+        $uri = self::uri();
 
-        $beg = $beg < 0 ? count(self::$uri) + $beg : $beg;
+        $beg = $beg < 0 ? count($uri) + $beg : $beg;
         if ($beg + $len > 0) {
-            $path = $len ? join('/', array_slice(self::$uri, $beg, $len)) : join('/', array_slice(self::$uri, $beg));
+            $path = $len ? join('/', array_slice($uri, $beg, $len)) : join('/', array_slice($uri, $beg));
             $path = str_replace('//', '/', '/' . $path . '/');
         }
         return $path ? $path : '/';
@@ -149,7 +171,7 @@ class Core
             self::$component_menu_id = self::$menu_by_link[md5($path)]['menu_id'];
         }
         $i++;
-        foreach (self::$uri as $u) {
+        foreach (self::uri() as $u) {
             if ($u) {
                 $path .= $u . '/';
                 if (!empty(self::$menu_by_link[md5($path)])) {
@@ -175,7 +197,7 @@ class Core
             self::$component_menu_id = self::$menu_by_link[md5($path)]['menu_id'];
         }
         $i++;
-        foreach (self::$uri as $u) {
+        foreach (self::uri() as $u) {
             if ($u) {
                 $path .= $u . '/';
                 if (!empty(self::$menu_by_link[md5($path)]['class'])) {
