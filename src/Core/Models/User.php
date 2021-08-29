@@ -29,7 +29,19 @@ class User extends ModelBase
      */
     public function ican($priv)
     {
-        $privileges = Buffer::getOrSet('user-priv-' . $this->id, function () {
+        $privileges = $this->getPrivileges();
+        if (is_int($priv)) {
+            return isset($privileges['ids'][$priv]);
+        }
+        return isset($privileges['names'][$priv]);
+    }
+
+    /**
+     * @return array ids => 1,2,3, names => priv1, priv2
+     */
+    public function getPrivileges()
+    {
+        return Buffer::getOrSet('user-priv-' . $this->id, function () {
             $q = "
                 SELECT priv_id, name
                 FROM user_priv
@@ -47,9 +59,6 @@ class User extends ModelBase
             }
             return compact('ids', 'names');
         });
-        if (is_int($priv)) {
-            return isset($privileges['ids'][$priv]);
-        }
-        return isset($privileges['names'][$priv]);
     }
+
 }
