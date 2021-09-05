@@ -14,8 +14,19 @@ class DB
     /**
      * @var Adapter
      */
-    protected static $db = false;
+    protected static $db;
     protected static $queries = [];
+
+    /**
+     * @return Adapter
+     */
+    protected static function db()
+    {
+        if (!isset(static::$db)) {
+            static::connect();
+        }
+        return static::$db;
+    }
 
     /**
      * Creates new adapter instance
@@ -36,8 +47,8 @@ class DB
     }
 
     /**
-     * @see Adapter::connect()
      * @return bool
+     * @see Adapter::connect()
      */
     public static function connect(): bool
     {
@@ -46,15 +57,15 @@ class DB
     }
 
     /**
-     * @see Adapter::bind()
      * @param $params
      * @return bool
+     * @see Adapter::bind()
      * @deprecated Use $params in query()/assoc()/result() instead
      */
     public static function bind($params): bool
     {
         if (is_array($params)) {
-            static::$db->bind($params);
+            static::db()->bind($params);
             return true;
         }
 
@@ -71,8 +82,8 @@ class DB
     {
         $execTime = microtime(1);
 
-        $result = static::$db->query($q, $params);
-        if (static::$db->errno()) {
+        $result = static::db()->query($q, $params);
+        if (static::db()->errno()) {
             static::logError($q);
         }
 
@@ -80,7 +91,7 @@ class DB
             static::$queries[] = [
                 'time' => microtime(1) - $execTime,
                 'sql' => $q,
-                'error' => static::$db->errno() ? static::$db->error() : ''
+                'error' => static::db()->errno() ? static::db()->error() : ''
             ];
         }
 
@@ -99,8 +110,8 @@ class DB
             return;
         }
 
-        $errno = static::$db->errno();
-        $error = static::$db->error();
+        $errno = static::db()->errno();
+        $error = static::db()->error();
 
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $call = @$trace[1]['file'] . ':' . @$trace[1]['line'];
@@ -114,13 +125,13 @@ class DB
     }
 
     /**
-     * @see Adapter::fetch()
      * @param $result
      * @return mixed
+     * @see Adapter::fetch()
      */
     public static function fetch(&$result)
     {
-        return static::$db->fetch($result);
+        return static::db()->fetch($result);
     }
 
     /**
@@ -132,7 +143,7 @@ class DB
      */
     public static function result(string $q, $field = '', array $params = [])
     {
-        return static::$db->result(static::query($q, $params), $field);
+        return static::db()->result(static::query($q, $params), $field);
     }
 
     /**
@@ -145,16 +156,16 @@ class DB
      */
     public static function assoc(string $q, $field1 = false, $field2 = false, array $params = [])
     {
-        return static::$db->assoc(static::query($q, $params), $field1, $field2);
+        return static::db()->assoc(static::query($q, $params), $field1, $field2);
     }
 
     /**
-     * @see Adapter::insertId()
      * @return string
+     * @see Adapter::insertId()
      */
     public static function insertId(): string
     {
-        return static::$db->insertId();
+        return static::db()->insertId();
     }
 
     /**
@@ -262,38 +273,38 @@ class DB
     }
 
     /**
-     * @see Adapter::errno()
      * @return int
+     * @see Adapter::errno()
      */
     public static function errno(): int
     {
-        return static::$db->errno();
+        return static::db()->errno();
     }
 
     /**
-     * @see Adapter::error()
      * @return string|null
+     * @see Adapter::error()
      */
     public static function error(): ?string
     {
-        return static::$db->error();
+        return static::db()->error();
     }
 
     /**
-     * @see Adapter::errorCode()
      * @return string|null
+     * @see Adapter::errorCode()
      */
     public static function errorCode(): ?string
     {
-        return static::$db->errorCode();
+        return static::db()->errorCode();
     }
 
     /**
      * Escapes array or string
      *
-     * @see Adapter::escape()
      * @param array|string $mixed Target to escape
      * @return array|string
+     * @see Adapter::escape()
      */
     public static function escape($mixed)
     {
@@ -305,7 +316,7 @@ class DB
             return $mixed;
         }
 
-        return static::$db->escape($mixed);
+        return static::db()->escape($mixed);
     }
 
     /**
@@ -358,12 +369,12 @@ class DB
     }
 
     /**
-     * @see Adapter::affectedRows()
      * @return int
+     * @see Adapter::affectedRows()
      */
     public static function affectedRows(): int
     {
-        return static::$db->affectedRows();
+        return static::db()->affectedRows();
     }
 
     /**
@@ -371,7 +382,7 @@ class DB
      */
     public static function transactionStart()
     {
-        static::$db->beginTransaction();
+        static::db()->beginTransaction();
     }
 
     /**
@@ -379,7 +390,7 @@ class DB
      */
     public static function transactionCommit()
     {
-        static::$db->commitTransaction();
+        static::db()->commitTransaction();
     }
 
     /**
@@ -387,7 +398,7 @@ class DB
      */
     public static function transactionRollback()
     {
-        static::$db->rollbackTransaction();
+        static::db()->rollbackTransaction();
     }
 
     /**
@@ -401,14 +412,14 @@ class DB
     }
 
     /**
-     * @see Adapter::seek()
      * @param mixed $r Adapter-specific result
      * @param int $index Index
      * @return bool
+     * @see Adapter::seek()
      */
     public static function seek(&$r, int $index): bool
     {
-        return static::$db->seek($r, $index);
+        return static::db()->seek($r, $index);
     }
 
     /**

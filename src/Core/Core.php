@@ -82,8 +82,8 @@ class Core
     }
 
     /**
-     * @deprecated use Request::isAjax() instead
      * @return bool
+     * @deprecated use Request::isAjax() instead
      */
     public static function ajax()
     {
@@ -91,9 +91,9 @@ class Core
     }
 
     /**
-     * @deprecated use Request::getUrlParts() instead
      * @param false $i
      * @return array|mixed|string
+     * @deprecated use Request::getUrlParts() instead
      */
     public static function uri($i = false)
     {
@@ -108,9 +108,9 @@ class Core
     }
 
     /**
-     * @deprecated use Request::getUrlParts() instead
      * @param $i
      * @return mixed|string
+     * @deprecated use Request::getUrlParts() instead
      */
     public static function uri_r($i)
     {
@@ -121,10 +121,10 @@ class Core
     }
 
     /**
-     * @deprecated use Request::getPath() instead
      * @param int $beg
      * @param int $len
      * @return array|string|string[]
+     * @deprecated use Request::getPath() instead
      */
     public static function path($beg = 0, $len = 0)
     {
