@@ -36,7 +36,7 @@ class Request
         // parse and compose URL
         $urlData = parse_url($_SERVER['REQUEST_URI']);
         $this->urlPath = $urlData['path'];
-        $this->urlParts = array_slice(explode('/', $this->urlParts), 1);
+        $this->urlParts = array_slice(explode('/', $this->urlPath), 1);
     }
 
     /**
