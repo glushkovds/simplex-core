@@ -432,4 +432,14 @@ class DB
     {
         return static::seek($r, 0);
     }
+
+    public static function wrapString(string $s): string
+    {
+        return '\'' . self::escape($s) . '\'';
+    }
+
+    public static function wrapName(string $s): string
+    {
+        return '`' . $s . '`';
+    }
 }
