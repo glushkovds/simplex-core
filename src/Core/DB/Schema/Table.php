@@ -81,14 +81,31 @@ class Table extends ElementBase
      * Adds a column
      *
      * @param string $name Column name
+     * @param string $type Column type
+     * @param int|null $length Column type length
      * @return \Simplex\Core\DB\Schema\Column
      */
-    public function addColumn(string $name): Column
+    public function addColumn(string $name, string $type, ?int $length = null): Column
     {
         $col = new Column($name);
+        $col->dataType($type, $length);
 
         $this->elements[$name] = $col;
         return $col;
+    }
+
+    /**
+     * Adds a constraint
+     *
+     * @param string $name Constraint symbol name
+     * @return \Simplex\Core\DB\Schema\Constraint
+     */
+    public function addConstraint(string $name): Constraint
+    {
+        $const = new Constraint($name);
+
+        $this->elements[$name] = $const;
+        return $const;
     }
 
     // ------------ UTIL ------------ //

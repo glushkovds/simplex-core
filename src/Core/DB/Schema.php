@@ -29,6 +29,8 @@ class Schema
     {
         $dbName = Container::getConfig()::$db_name;
 
+        // TODO: load full table structure
+
         $this->tables = [];
 
         $tables = DB::query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?', [$dbName]);
