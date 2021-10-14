@@ -12,10 +12,13 @@ class Table extends ElementBase
     /** @var \Simplex\Core\DB\Schema\Element[] */
     protected $elements = [];
 
-    public function __construct(string $name)
+    protected $isExisting;
+
+    public function __construct(string $name, bool $isExisting = false)
     {
         $this->params = new TableParams();
         $this->name = $name;
+        $this->isExisting = $isExisting;
     }
 
     // ------------ BUILDER ------------ //
