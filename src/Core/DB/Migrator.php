@@ -98,9 +98,11 @@ class Migrator extends ConsoleBase
 
             $schema = new Schema();
             if (!$class->up($schema)) {
+                $dbError = DB::error();
                 $schema->rollback();
 
                 Alert::error('Failed to up migration ' . $migration);
+                Alert::text($dbError);
                 return;
             }
 
@@ -111,6 +113,7 @@ class Migrator extends ConsoleBase
             if (!$dbMigration->insert(['file' => $migration])) {
                 if (!$class->down($schema)) {
                     Alert::error('FATAL: failed to down migration ' . $migration . ' after DB failure');
+                    Alert::text(DB::error());
                     return;
                 }
 
@@ -149,14 +152,17 @@ class Migrator extends ConsoleBase
             $schema = new Schema();
             if (!$class->down($schema)) {
                 Alert::error('Failed to down migration ' . $migration['file']);
+                Alert::text(DB::error());
                 return;
             }
 
             if (!$migration->delete()) {
                 if (!$class->up($schema)) {
+                    $dbError = DB::error();
                     $schema->rollback();
 
                     Alert::error('FATAL: Failed to up migration ' . $migration['file'] . 'after DB failure');
+                    Alert::text($dbError);
                     return;
                 }
 

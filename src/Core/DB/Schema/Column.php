@@ -4,16 +4,17 @@ namespace Simplex\Core\DB\Schema;
 use Simplex\Core\DB;
 use Simplex\Core\DB\Schema\Params\ColumnParams;
 
-class Column extends ElementBase
+class Column extends TableElementBase
 {
     /** @var \Simplex\Core\DB\Schema\Params\ColumnParams  */
     protected $params;
     protected $type = '';
 
-    public function __construct(string $name)
+    public function __construct(string $name, ?Table $table = null)
     {
         $this->name = $name;
         $this->params = new ColumnParams();
+        $this->table = $table;
     }
 
     // ------------ BUILDER ------------ //

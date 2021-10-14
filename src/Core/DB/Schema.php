@@ -35,8 +35,15 @@ class Schema
 
         $tables = DB::query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?', [$dbName]);
         while ($table = DB::fetch($tables)) {
-            $this->tables[$table['TABLE_NAME']] = new Table($table['TABLE_NAME']);
+            $tableName = $table['TABLE_NAME'];
+            $this->tables[$tableName] = $this->loadTable($tableName);
         }
+    }
+
+    protected function loadTable(string $name): Table
+    {
+        $table = new Table($name, true);
+        return $table;
     }
 
     public function hasTable(string $name): bool
@@ -63,9 +70,9 @@ class Schema
      *
      * @throws \Exception
      */
-    public function dropTable(string $name)
+    public function dropTable(string $name, bool $checkIfExists = false)
     {
-        if (!$this->hasTable($name)) {
+        if ($checkIfExists && !$this->hasTable($name)) {
             throw new \Exception('Table ' . $name . ' does not exist');
         }
 
@@ -104,7 +111,7 @@ class Schema
     {
         // delete tables, no rollback available
         foreach ($this->awaitingDelete as $table) {
-            $status = !!DB::query('DROP TABLE `' . $table->getName() . '`');
+            $status = !!DB::query('DROP TABLE IF EXISTS `' . $table->getName() . '`');
             if (!$status) {
                 return false;
             }
