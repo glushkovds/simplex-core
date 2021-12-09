@@ -51,6 +51,7 @@ class Column extends TableElementBase
     public function autoIncrement(bool $v = true): self
     {
         $this->params->autoIncrement = $v;
+        $this->params->isNull = false;
         return $this;
     }
 
@@ -63,6 +64,12 @@ class Column extends TableElementBase
     public function collate(string $collation): self
     {
         $this->params->collate = $collation;
+        return $this;
+    }
+
+    public function primaryKey(): self
+    {
+        $this->params->isPrimaryKey = true;
         return $this;
     }
 
@@ -98,6 +105,10 @@ class Column extends TableElementBase
         if ($this->params->default) {
             $sql .= 'DEFAULT '
                 . (is_string($this->params->default) ? DB::wrapString($this->params->default) : $this->params->default);
+        }
+
+        if ($this->params->isPrimaryKey) {
+            $sql .= 'PRIMARY KEY ';
         }
 
         if ($this->params->autoIncrement) {

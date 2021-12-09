@@ -61,17 +61,21 @@ class Constraint extends ElementBase
      * References column(s) in another table
      *
      * @param string $referenceTable Target reference table
-     * @param array $colToReference Associative array of my_column => their_column
+     * @param string|array $colToReference Associative array or string of my_column => their_column
      * @return $this
      */
-    public function foreignKey(string $referenceTable, array $colToReference): self
+    public function foreignKey(string $referenceTable, $colToReference): self
     {
         $columns = [];
         $referenceColumns = [];
 
-        foreach ($colToReference as $column => $reference) {
-            $columns[] = $column;
-            $referenceColumns[] = $reference;
+        if (is_array($colToReference)) {
+            foreach ($colToReference as $column => $reference) {
+                $columns[] = $column;
+                $referenceColumns[] = $reference;
+            }
+        } else {
+            $columns = $referenceColumns = [$colToReference];
         }
 
         $this->params->isUnique = $this->params->isPrimary = false;
