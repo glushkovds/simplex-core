@@ -1,11 +1,11 @@
 <?php
 namespace Simplex\Core\Api;
 
+use Simplex\Core\Container;
 use Simplex\Core\Core;
 use Simplex\Core\Errors\Error;
 use Simplex\Core\Errors\ErrorCodes;
-use Simplex\Core\Response;
-use Simplex\Core\User;
+use Simplex\Core\Models\User;
 
 abstract class Base
 {
@@ -13,6 +13,11 @@ abstract class Base
      * @var bool Should require authentication on all methods?
      */
     protected $requireAuth = false;
+
+    /**
+     * @var User|null Authenticated user (set ONLY if requireAuth = true)
+     */
+    protected $user = null;
 
     /**
      * @return string
@@ -27,7 +32,7 @@ abstract class Base
      */
     protected function getMethodName(): string
     {
-        $name = 'action' . ucfirst(Core::uri(0) ?: 'index');
+        $name = 'action' . ucfirst(Container::get('request')->getUrlParts(0) ?: 'index');
         if (!method_exists($this, $name)) {
             throw Error::byCode(ErrorCodes::APP_METHOD_NOT_FOUND);
         }
@@ -35,20 +40,19 @@ abstract class Base
         return $name;
     }
 
-    protected function auth()
+    /**
+     * Assert that user is currently authenticated
+     * 
+     * @throws Error
+     * @return User
+     */
+    protected function assertAuthenticated(): User
     {
-        static::tryAuthBasic();
-
-        if (!User::$id && $this->requireAuth) {
+        $user = Container::get('user');
+        if (!$user) {
             throw Error::byCode(ErrorCodes::APP_UNAUTHORIZED);
         }
-    }
 
-    protected function tryAuthBasic()
-    {
-        if ($login =& $_SERVER['PHP_AUTH_USER']) {
-            $pass = $_SERVER['PHP_AUTH_PW'] ?? '';
-            User::authorizeOnce($login, $pass);
-        }
+        return $user;
     }
 }

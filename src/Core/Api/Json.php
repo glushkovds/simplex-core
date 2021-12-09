@@ -9,7 +9,10 @@ class Json extends Base
         $response = new JsonResponse();
 
         try {
-            static::auth();
+            if ($this->requireAuth) {
+                $this->user = $this->assertAuthenticated();
+            }
+
             $response->setData($this->{$this->getMethodName()}($request, $response));
         } catch (\Throwable $ex) {
             $response->setError($ex);

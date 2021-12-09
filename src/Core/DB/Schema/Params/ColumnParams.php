@@ -8,4 +8,5 @@ class ColumnParams
     public $autoIncrement = false;
     public $comment = '';
     public $collate = '';
+    public $isPrimaryKey = false;
 }
