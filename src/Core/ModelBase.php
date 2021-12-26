@@ -230,14 +230,17 @@ abstract class ModelBase implements \ArrayAccess
      * @param array $data
      * @return bool
      */
-    public function update(array $data)
+    public function update(array $data = null)
     {
         if (!$this->id) {
             return false;
         }
         $result = false;
-        if ($this->beforeUpdate($data)) {
-            $set = static::prepareSet($data);
+        $data && $this->fill($data);
+        if ($this->beforeUpdate()) {
+            $uData = $this->data;
+            unset($uData[static::$primaryKeyName]);
+            $set = static::prepareSet($uData);
             $q = "UPDATE " . static::$table . " SET " . implode(', ', $set) . " WHERE `" . static::$primaryKeyName . "` = $this->id";
             $result = $this->query($q);
             if ($result) {
@@ -367,7 +370,7 @@ abstract class ModelBase implements \ArrayAccess
 
     }
 
-    protected function beforeUpdate($data)
+    protected function beforeUpdate()
     {
         $this->dataBeforeUpdate = $this->data;
         return true;
