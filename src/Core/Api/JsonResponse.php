@@ -79,12 +79,13 @@ class JsonResponse extends Response
      * Sets error from throwable
      *
      * @param \Throwable $err Throwable to set from
+     * @param bool $overwriteStatusCode
      * @return $this
      */
-    public function setError(\Throwable $err): self
+    public function setError(\Throwable $err, $overwriteStatusCode = true): self
     {
         // override status code if it wasn't set to other one yet
-        if ($this->statusCode == 200) {
+        if ($this->statusCode == 200 && $overwriteStatusCode) {
             $this->statusCode = ErrorCodes::getHttpStatusCode($err->getCode()) ?? 500;
         }
 
