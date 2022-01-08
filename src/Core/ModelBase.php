@@ -21,7 +21,7 @@ use Simplex\Core\Helpers\Str;
  *    $model->save(); or $model->insert(); or $model->update(); or $model->delete(); or $model->update(['text' => '234']);
  *    $model = ModelTest::findOne('text = "234"'); or $models = ModelTest::find(['text = "234"']);
  */
-abstract class ModelBase implements \ArrayAccess
+abstract class ModelBase implements \ArrayAccess, \JsonSerializable
 {
 
     const FLAG_IGNORE = 1;
@@ -465,6 +465,12 @@ abstract class ModelBase implements \ArrayAccess
     public function toArray()
     {
         return $this->data;
+    }
+
+    /** @inheritDoc */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
 }
