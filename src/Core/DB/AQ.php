@@ -143,6 +143,7 @@ class AQ
      * @param null|string $column If null query will return primary key
      * @return AQ
      * @throws \Exception
+     * @deprecated use fetchScalar
      */
     public function selectColumn($column = null)
     {
@@ -155,11 +156,57 @@ class AQ
         return $this->select($column)->asScalar($column);
     }
 
+    /**
+     * @param int|string $column
+     * @return $this
+     * @deprecated use fetchScalar
+     */
     public function asScalar($column = 0)
     {
         $this->asArray = false;
         $this->scalarColumn = $column;
         return $this;
+    }
+
+    /**
+     * @param int|string $column
+     * @return string|int|null
+     * @throws \Exception
+     */
+    public function fetchScalar($column = 0)
+    {
+        $q = $this->build();
+        $r = DB::query($q);
+        $row = DB::fetch($r);
+        if (is_int($column)) {
+            $row = array_values($row);
+        }
+        if ($row && !array_key_exists($column, $row)) {
+            throw new \Exception("Column $column does not exist in fetched row");
+        }
+        return $row[$column];
+    }
+
+    /**
+     * @param int|string $column
+     * @return ModelBase|null
+     * @throws \Exception
+     */
+    public function fetchOne()
+    {
+        $q = $this->build();
+        $r = DB::query($q);
+        $row = DB::fetch($r);
+        if (!$row) {
+            return null;
+        }
+        if ($this->asArray) {
+            return $row;
+        }
+        if (empty($this->modelClass)) {
+            throw new \Exception('Model class not specified');
+        }
+        return (new $this->modelClass)->fill($row);
     }
 
     /**
