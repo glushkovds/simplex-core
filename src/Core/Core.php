@@ -7,18 +7,18 @@ use Simplex\Core\Html\HtmlResponse;
 
 class Core
 {
-    private static $ajax = false;
-    private static $uri = [];
-    private static $path = '';
-    private static $site_params = false;
-    private static $menu_tree = [];
-    private static $menu_by_id = [];
-    private static $menu_by_link = [];
-    private static $menu_by_ext = [];
-    private static $menu_cur = false;
-    private static $component_level = 0;
-    private static $component_menu_id = 0;
-    private static $content_only = false;
+    protected static $ajax = false;
+    protected static $uri = [];
+    protected static $path = '';
+    protected static $site_params = false;
+    protected static $menu_tree = [];
+    protected static $menu_by_id = [];
+    protected static $menu_by_link = [];
+    protected static $menu_by_ext = [];
+    protected static $menu_cur = false;
+    protected static $component_level = 0;
+    protected static $component_menu_id = 0;
+    protected static $content_only = false;
 
     private function __construct()
     {
@@ -63,6 +63,11 @@ class Core
             self::$site_params[$row['alias']] = $row['value'];
         }
 
+        static::initMenu();
+    }
+
+    protected static function initMenu()
+    {
         $q = "SELECT t1.*, t2.class
         FROM menu t1
         LEFT JOIN component t2 ON t2.component_id=t1.component_id
