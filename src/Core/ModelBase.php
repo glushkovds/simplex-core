@@ -429,7 +429,7 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
     public function offsetGet($offset)
     {
         if ($this->id && !isset($this->data[$offset])) {
-            if ($maybe = $this->data[Str::toUnderscore($offset)]) {
+            if ($maybe = ($this->data[Str::toUnderscore($offset)] ?? null)) {
                 return $maybe;
             }
             if (method_exists($this, $method = 'offsetGet' . lcfirst($offset))) {
