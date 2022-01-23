@@ -459,30 +459,42 @@ class Time
      * @param int $res_time
      * @param boolean $show_sec - выводить секунды или нет
      * @return string
+     * @deprecated use secondsToTime
      */
     public static function sub_time($res_time, $show_sec = true)
     {
-        if ($res_time > 0) {
-            $res_time = round($res_time);
+        return static::secondsToTime($res_time, $show_sec);
+    }
 
-            $hour = (int)floor($res_time / 3600);
-            $minute = (int)floor(($res_time - $hour * 3600) / 60);
-            $second = $res_time - $hour * 3600 - $minute * 60;
+    /**
+     * вход: 129; выход 02:09
+     * @param int $seconds
+     * @param boolean $showSec - выводить секунды или нет
+     * @return string
+     */
+    public static function secondsToTime($seconds, $showSec = true)
+    {
+        $secondsCalc = abs(round($seconds));
+        $hour = (int)floor($secondsCalc / 3600);
+        $minute = (int)floor(($secondsCalc - $hour * 3600) / 60);
+        $second = $secondsCalc - $hour * 3600 - $minute * 60;
 
-            if ($hour >= 0 && $hour < 10)
-                $hour = '0' . $hour;
-            if ($minute >= 0 && $minute < 10)
-                $minute = '0' . $minute;
-            if ($second >= 0 && $second < 10)
-                $second = '0' . $second;
+        if ($hour >= 0 && $hour < 10) {
+            $hour = '0' . $hour;
+        }
+        if ($minute >= 0 && $minute < 10) {
+            $minute = '0' . $minute;
+        }
+        if ($second >= 0 && $second < 10) {
+            $second = '0' . $second;
+        }
 
-            $ret = "$hour:$minute";
-            if ($show_sec)
-                $ret .= ":$second";
+        $ret = "$hour:$minute";
+        if ($showSec) {
+            $ret .= ":$second";
+        }
 
-            return $ret;
-        } else
-            return 0;
+        return $seconds >= 0 ? $ret : "-$ret";
     }
 
     /**
@@ -695,6 +707,30 @@ class Time
         $datetime2 = new \DateTime($dd);
         $interval = $datetime1->diff($datetime2);
         return new TimeDiff($interval);
+    }
+
+    /**
+     * Returns date - start of the week (Monday) of specified date
+     * @param string $forDate format Y-m-d (mysql)
+     * @return string format Y-m-d (mysql)
+     */
+    public static function weekStart($forDate)
+    {
+        $dateTime = new \DateTime($forDate);
+        $dateTime->setISODate((int)$dateTime->format('o'), (int)$dateTime->format('W'), 1);
+        return $dateTime->format('Y-m-d');
+    }
+
+    /**
+     * Returns date - end of the week (Sunday) of specified date
+     * @param string $forDate format Y-m-d (mysql)
+     * @return string format Y-m-d (mysql)
+     */
+    public static function weekEnd($forDate)
+    {
+        $dateTime = new \DateTime($forDate);
+        $dateTime->setISODate((int)$dateTime->format('o'), (int)$dateTime->format('W'), 7);
+        return $dateTime->format('Y-m-d');
     }
 
 }
