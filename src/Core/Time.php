@@ -399,33 +399,39 @@ class Time
             foreach ($replace as $L) {
                 if ("X" == $L) {
                     $ret = preg_replace_callback(
-                        '/ \@\#(\d+)\#\@ /i', create_function('$matches', 'return ' . get_class() . '::$monthsFull[(int)$matches[1]];'), $ret
-                    );
+                        '/ \@\#(\d+)\#\@ /i', function ($matches) {
+                        return static::$monthsFull[(int)$matches[1]];
+                    }, $ret);
                 }
                 if ("Q" == $L) {
                     $ret = preg_replace_callback(
-                        '/ \@\@\#(\d+)\#\@\@ /i', create_function('$matches', 'return ' . get_class() . '::$monthsDat[(int)$matches[1]];'), $ret
-                    );
+                        '/ \@\@\#(\d+)\#\@\@ /i', function ($matches) {
+                        return static::$monthsDat[(int)$matches[1]];
+                    }, $ret);
                 }
                 if ("E" == $L) {
                     $ret = preg_replace_callback(
-                        '/ \@\~\@\#(\d+)\#\@\~\@ /i', create_function('$matches', 'return ' . get_class() . '::$monthsFullUCF[(int)$matches[1]];'), $ret
-                    );
+                        '/ \@\~\@\#(\d+)\#\@\~\@ /i', function ($matches) {
+                        return static::$monthsFullUCF[(int)$matches[1]];
+                    }, $ret);
                 }
                 if ("R" == $L) {
                     $ret = preg_replace_callback(
-                        '/ \@\-\#(\d+)\#\-\@ /i', create_function('$matches', 'return ' . get_class() . '::$wdays[(int)$matches[1]];'), $ret
-                    );
+                        '/ \@\-\#(\d+)\#\-\@ /i', function ($matches) {
+                        return static::$wdays[(int)$matches[1]];
+                    }, $ret);
                 }
                 if ("J" == $L) {
                     $ret = preg_replace_callback(
-                        '/ \@\-\-\#(\d+)\#\-\-\@ /i', create_function('$matches', 'return ' . get_class() . '::$wdaysFullLC[(int)$matches[1]];'), $ret
-                    );
+                        '/ \@\-\-\#(\d+)\#\-\-\@ /i', function ($matches) {
+                        return static::$wdaysFullLC[(int)$matches[1]];
+                    }, $ret);
                 }
                 if ("K" == $L) {
                     $ret = preg_replace_callback(
-                        '/ \@\-_\-\#(\d+)\#\-_\-\@ /i', create_function('$matches', 'return ' . get_class() . '::$months[(int)$matches[1]];'), $ret
-                    );
+                        '/ \@\-_\-\#(\d+)\#\-_\-\@ /i', function ($matches) {
+                        return static::$months[(int)$matches[1]];
+                    }, $ret);
                 }
             }
         }
