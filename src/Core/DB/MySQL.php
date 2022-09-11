@@ -29,15 +29,9 @@ class MySQL implements Adapter
         $cfg = Container::getConfig();
         $host = $cfg::$db_host;
         $database = $cfg::$db_name;
-
-        try {
-            $this->db = new PDO("mysql:host=$host;dbname=$database", $cfg::$db_user, $cfg::$db_pass);
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-
-            return true;
-        } catch (PDOException $ex) {
-            die('<b>Error! Could not connect to database: ' . $ex->getMessage() . '</b>');
-        }
+        $this->db = new PDO("mysql:host=$host;dbname=$database", $cfg::$db_user, $cfg::$db_pass);
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, Container::getConfig()::$mysqlErrorMode);
+        return true;
     }
 
     public function bind(array $params)

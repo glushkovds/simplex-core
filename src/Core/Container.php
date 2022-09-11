@@ -10,7 +10,6 @@ namespace Simplex\Core;
  * @method static Config getConfig
  * @method static Page getPage
  * @method static Core getCore
- * @method static \Simplex\Core\Models\User|null getUser
  * @method static \Simplex\Core\Request getRequest
  * @method static \Simplex\Core\Response getResponse
  * @method static User getUserLegacy
@@ -42,5 +41,26 @@ class Container
         }
 
         throw new \BadMethodCallException();
+    }
+
+    public static function setAuthHandler(callable $closure)
+    {
+        static::$registry['authHandler'] = $closure;
+    }
+
+    /**
+     * @return \Simplex\Core\Models\User|null
+     */
+    public static function getUser()
+    {
+        if (
+            !($called =& static::$registry['authHandlerCalled'])
+            && ($authHandler =& static::$registry['authHandler'])
+            && is_callable($authHandler)
+        ) {
+            $authHandler();
+            $called = true;
+        }
+        return static::get('user');
     }
 }
