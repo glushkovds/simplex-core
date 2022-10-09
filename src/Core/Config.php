@@ -21,6 +21,8 @@ class Config
      */
     public static $logLevel = 'debug';
     public static $logPath = '/var/log';
-    
+
     public static $mysqlErrorMode = 0; // PDO::ERRMODE_SILENT
+
+    public static $routesFile = SF_CORE_ROOT_PATH . '/routes.php';
 }

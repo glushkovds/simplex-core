@@ -4,6 +4,7 @@ namespace Simplex\Core;
 
 use Simplex\Core\Html\HtmlRequest;
 use Simplex\Core\Html\HtmlResponse;
+use Simplex\Core\Routing\Resolver;
 
 class Core
 {
@@ -167,27 +168,11 @@ class Core
 
     public static function getComponent()
     {
-        $class = $classDefault = Container::getConfig()::$component_default;
-        $path = '/';
-        $i = 0;
-        if (!empty(self::$menu_by_link[md5($path)]['class'])) {
-            $class = self::$menu_by_link[md5($path)]['class'];
-            self::$component_level = $i;
-            self::$component_menu_id = self::$menu_by_link[md5($path)]['menu_id'];
-        }
-        $i++;
-        foreach (self::uri() as $u) {
-            if ($u) {
-                $path .= $u . '/';
-                if (!empty(self::$menu_by_link[md5($path)])) {
-                    $class = self::$menu_by_link[md5($path)]['class'] ?: $classDefault;
-                    self::$component_level = $i;
-                    self::$component_menu_id = self::$menu_by_link[md5($path)]['menu_id'];
-                }
-            }
-            $i++;
-        }
-        return new $class();
+        $route = (new Resolver())
+            ->setMenuByLink(self::$menu_by_link) // for deprecated routing by menu database table
+            ->resolve(Container::getConfig()::$routesFile);
+        $componentClass = $route->getComponentClassName();
+        return new $componentClass();
     }
 
     public static function getComponentAPI()
