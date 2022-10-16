@@ -473,4 +473,15 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
         return $this->toArray();
     }
 
+    /**
+     * 
+     * 
+     * @see Core/DB/HowTo/UsingModifiers.md
+     * @return array
+     */
+    public static function aqModifiersDefault(): array
+    {
+        return [];
+    }
+
 }

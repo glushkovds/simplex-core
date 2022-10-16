@@ -18,13 +18,13 @@ class Where implements \ArrayAccess
     public function __construct($where = [])
     {
         if ($where instanceof static) {
-            $this->data = array_filter($where->toArray());
+            $this->data = $where->toArray();
         }
         if (is_string($where) || $where instanceof Expr) {
             $this->data[] = $where;
         }
         if (is_array($where)) {
-            $this->data = array_filter($where);
+            $this->data = $where;
         }
     }
 
@@ -88,20 +88,17 @@ class Where implements \ArrayAccess
     {
         $result = [];
         foreach ($data as $index => $value) {
-            if (
-                // Skip condition if empty array
-                is_array($value) && !$value
-                // Or if empty trimmed string
-                || !is_array($value) && !($value = trim($value))
-            ) {
+            // Skip condition if empty array
+            if (is_array($value) && !$value) {
                 continue;
-            }
-            if ($isAssociative = (string)$index !== (string)(int)$index) {
+            } elseif (is_null($value)) {
+                $result[] = "`$index` IS NULL";
+            } elseif ((string)$index !== (string)(int)$index) {
                 if (is_array($value)) {
                     $values = implode(',', array_map([ModelBase::class, 'prepareValue'], $value));
                     $result[] = "`$index` IN ($values)";
                 } else {
-                    $result[] = "`$index` = " .  ModelBase::prepareValue($value);
+                    $result[] = "`$index` = " . ModelBase::prepareValue($value);
                 }
             } else {
                 if (is_array($value)) {

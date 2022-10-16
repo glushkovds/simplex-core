@@ -124,6 +124,11 @@ class AQ
      */
     public function build()
     {
+        if ($this->modelClass) {
+            foreach ($this->modelClass::aqModifiersDefault() as $modifier) {
+                $this->modify($modifier);
+            }
+        }
         if (empty($this->from) || !is_string($this->from)) {
             throw new \Exception('Bad from statement');
         }
@@ -269,6 +274,26 @@ class AQ
     public function __toString()
     {
         return $this->build();
+    }
+
+    /**
+     * @see Core/DB/HowTo/UsingModifiers.md
+     * @param string $modifier
+     * @param ...$params
+     * @return $this
+     * @throws \Exception
+     */
+    public function modify(string $modifier, ...$params)
+    {
+        if (empty($this->modelClass)) {
+            throw new \Exception("Model class must be specified for modifier $modifier");
+        }
+        $modifierAction = 'aqModify' . ucfirst($modifier);
+        if (!method_exists($this->modelClass, $modifierAction)) {
+            throw new \Exception("There is no modifier $modifier in $this->modelClass");
+        }
+        $this->modelClass::$modifierAction($this, ...$params);
+        return $this;
     }
 
 }
