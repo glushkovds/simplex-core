@@ -474,8 +474,6 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * 
-     * 
      * @see Core/DB/HowTo/UsingModifiers.md
      * @return array
      */

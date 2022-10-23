@@ -103,7 +103,7 @@ class Where implements \ArrayAccess
             } else {
                 if (is_array($value)) {
                     throw new \Exception('Where: array-valued statement must be associative.');
-                } else {
+                } elseif ($value) {
                     $result[] = $value;
                 }
             }
@@ -120,4 +120,3 @@ class Where implements \ArrayAccess
     }
 
 }
-

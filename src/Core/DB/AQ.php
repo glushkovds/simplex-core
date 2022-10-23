@@ -137,7 +137,7 @@ class AQ
         $q[] = 'SELECT ' . $this->getSelect();
         $q[] = "FROM `$this->from`";
         foreach ($this->join as $join) {
-            $q[] = $join->toSql();
+            $q[] = $join->toSql($this->from);
         }
         $q[] = new Where($this->where);
         if ($orderBy = $this->orderBy) {
@@ -302,16 +302,33 @@ class AQ
     }
 
     /**
-     * @param $table
+     * @param string|ModelBase $table
      * @param string $joinColumn1
      * @param string|null $joinColumn2
-     * @param string $type
+     * @param string $type for example INNER, LEFT, RIGHT, FULL
+     * @param string|Where|array|null $extraOnConditions
      * @return $this
      * @throws \Exception
+     * @see Core/DB/HowTo/UsingJoin.md
      */
-    public function join($table, string $joinColumn1, ?string $joinColumn2 = null, string $type = 'INNER')
+    public function join($table, string $joinColumn1, ?string $joinColumn2 = null, string $type = 'INNER', $extraOnConditions = null)
     {
-        $this->join[] = new JoinClause($table, $joinColumn1, $joinColumn2, $type);
+        $this->join[] = new JoinClause($table, $joinColumn1, $joinColumn2, $type, $extraOnConditions);
+        return $this;
+    }
+
+    /**
+     * @param string|ModelBase $table
+     * @param string $joinColumn1
+     * @param string|null $joinColumn2
+     * @param string|Where|array|null $extraOnConditions
+     * @return $this
+     * @throws \Exception
+     * @see Core/DB/HowTo/UsingJoin.md
+     */
+    public function leftJoin($table, string $joinColumn1, ?string $joinColumn2 = null, $extraOnConditions = null)
+    {
+        $this->join[] = new JoinClause($table, $joinColumn1, $joinColumn2, 'LEFT', $extraOnConditions);
         return $this;
     }
 
