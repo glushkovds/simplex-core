@@ -15,11 +15,13 @@ class AQ
 
     protected $select = '*';
     protected $from;
+    /** @var JoinClause[] */
+    protected $join = [];
     protected $where = '';
     protected $orderBy = '';
     protected $limit = '';
     protected $asArray = false;
-    /** @var  ModelBase|null */
+    /** @var ModelBase|null */
     protected $modelClass;
 
     /** @var string|int|null {column name} or {column index in query result} for asScalar functionality */
@@ -81,7 +83,7 @@ class AQ
      * @param string $orderBy
      * @return $this
      */
-    public function orderBy($orderBy)
+    public function orderBy(string $orderBy)
     {
         $this->orderBy = $orderBy;
         return $this;
@@ -134,8 +136,11 @@ class AQ
         }
         $q[] = 'SELECT ' . $this->getSelect();
         $q[] = "FROM `$this->from`";
+        foreach ($this->join as $join) {
+            $q[] = $join->toSql();
+        }
         $q[] = new Where($this->where);
-        if ($orderBy = (string)$this->orderBy) {
+        if ($orderBy = $this->orderBy) {
             $q[] = 'ORDER BY ' . DB::escape($orderBy);
         }
         if ($limit = (string)$this->limit) {
@@ -277,11 +282,11 @@ class AQ
     }
 
     /**
-     * @see Core/DB/HowTo/UsingModifiers.md
      * @param string $modifier
      * @param ...$params
      * @return $this
      * @throws \Exception
+     * @see Core/DB/HowTo/UsingModifiers.md
      */
     public function modify(string $modifier, ...$params)
     {
@@ -293,6 +298,20 @@ class AQ
             throw new \Exception("There is no modifier $modifier in $this->modelClass");
         }
         $this->modelClass::$modifierAction($this, ...$params);
+        return $this;
+    }
+
+    /**
+     * @param $table
+     * @param string $joinColumn1
+     * @param string|null $joinColumn2
+     * @param string $type
+     * @return $this
+     * @throws \Exception
+     */
+    public function join($table, string $joinColumn1, ?string $joinColumn2 = null, string $type = 'INNER')
+    {
+        $this->join[] = new JoinClause($table, $joinColumn1, $joinColumn2, $type);
         return $this;
     }
 
