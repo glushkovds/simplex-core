@@ -21,7 +21,7 @@ class File
         }
         $this->path .= '/' . $this->path_base;
         if (!is_dir($this->path)) {
-            mkdir($this->path);
+            mkdir($this->path, 0777, true);
         }
         $this->path .= '/';
 
