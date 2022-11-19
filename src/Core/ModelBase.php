@@ -123,10 +123,8 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
      */
     public static function findOne($where, $returnModelIfNotFound = false)
     {
-        $whereObj = new Where($where);
-        $q = "SELECT * FROM " . static::$table . " $whereObj LIMIT 1";
-        $row = DB::result($q);
-        return $row ? (new static)->fill($row) : ($returnModelIfNotFound ? new static : null);
+        $row = static::findAdv()->andWhere($where)->limit(1)->fetchOne();
+        return $row ?? ($returnModelIfNotFound ? new static : null);
     }
 
     /**
@@ -474,8 +472,8 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * @see Core/DB/HowTo/UsingModifiers.md
      * @return array
+     * @see Core/DB/HowTo/UsingModifiers.md
      */
     public static function aqModifiersDefault(): array
     {

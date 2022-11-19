@@ -52,7 +52,7 @@ class Content extends ComponentBase
                 $q = "SELECT content_id, title, short, text, path, photo FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
                 $children = DB::assoc($q);
             }
-            include __DIR__ . '/tpl/' . ($content->template_path ?? 'default.tpl');
+            include static::findTemplateFile($content->template_path ?? 'default.tpl');
         } else {
             Core::error404();
         }
@@ -70,6 +70,17 @@ class Content extends ComponentBase
                 $id = (int)$content['pid'];
             }
         }
+    }
+
+    protected static function findTemplateFile(string $name): string
+    {
+        if (is_file($path = SF_ROOT_PATH . '/Extensions/Content/tpl/' . $name)) {
+            return $path;
+        }
+        if (is_file($path = __DIR__ . '/tpl/' . $name)) {
+            return $path;
+        }
+        return __DIR__ . '/tpl/default.tpl';
     }
 
 }

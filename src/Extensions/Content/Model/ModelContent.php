@@ -15,8 +15,7 @@ class ModelContent extends ModelBase
 
     public static function aqModifyWithTemplate(AQ $AQ)
     {
-        $AQ->join(ModelContentTemplate::class, 'template_id')
-            ->select(['content.*', 'path' => 'template_path']);
+        $AQ->join(ModelContentTemplate::class, 'template_id');
     }
 
     public static function aqModifiersDefault(): array
