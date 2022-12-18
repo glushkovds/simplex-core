@@ -8,6 +8,7 @@ class Image extends File
 {
 
     public $path_base = 'images';
+    protected $uploadedFilePath;
 
     /**
      *
@@ -26,7 +27,7 @@ class Image extends File
 
     public function loadPost($fileName)
     {
-        if (is_uploaded_file($_FILES[$fileName]['tmp_name'])) {
+        if (is_uploaded_file($this->uploadedFilePath = $_FILES[$fileName]['tmp_name'])) {
             //print_r($_FILES);
             //echo $_FILES[$fileName]['type'];
             switch ($_FILES[$fileName]['type']) {
@@ -41,6 +42,10 @@ class Image extends File
                 case 'image/pjpeg' :
                     $this->type = 'jpg';
                     $this->img = imagecreatefromjpeg($_FILES[$fileName]['tmp_name']);
+                    break;
+                case 'image/webp' :
+                    $this->type = 'webp';
+                    $this->img = imagecreatefromwebp($_FILES[$fileName]['tmp_name']);
                     break;
                 case 'image/png' :
                     $this->type = 'png';
@@ -82,6 +87,7 @@ class Image extends File
     public function save()
     {
         if ($this->img) {
+            copy($this->uploadedFilePath, $this->outputMkDirReturnFilePath('raw'));
             $img = null;
             $width = imagesx($this->img);
             $height = imagesy($this->img);
@@ -128,7 +134,7 @@ class Image extends File
         }
     }
 
-    private function output($img, $subdir)
+    protected function outputMkDirReturnFilePath($subdir)
     {
         $typeStr = $this->getTypeStr($this->type);
         $name = $this->name . '.' . $typeStr;
@@ -141,13 +147,22 @@ class Image extends File
                 }
             }
         }
+        return $this->path . $folder . $name;
+    }
+
+    private function output($img, $subdir)
+    {
+        $typeStr = $this->getTypeStr($this->type);
+        $file = $this->outputMkDirReturnFilePath($subdir);
         switch ($typeStr) {
             case 'gif' :
-                return imagegif($img, $this->path . $folder . $name);
+                return imagegif($img, $file);
             case 'jpg' :
-                return imagejpeg($img, $this->path . $folder . $name, 100);
+                return imagejpeg($img, $file, 100);
             case 'png' :
-                return imagepng($img, $this->path . $folder . $name);
+                return imagepng($img, $file);
+            case 'webp' :
+                return imagewebp($img, $file);
         }
     }
 
@@ -155,13 +170,13 @@ class Image extends File
     {
         parent::delete($name);
         $success = true;
-        foreach ($this->sizes as $subdir => $size) {
+        foreach ($this->sizes + ['raw' => ''] as $subdir => $_) {
             $folder = '';
             if ($subdir) {
                 $folder = $subdir . '/';
             }
-            if (is_file($this->path . $folder . $name)) {
-                $success &= @unlink($this->path . $folder . $name);
+            if (is_file($f = $this->path . $folder . $name)) {
+                $success &= @unlink($f);
             }
         }
         return $success;

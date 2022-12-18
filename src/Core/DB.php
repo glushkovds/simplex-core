@@ -316,7 +316,7 @@ class DB
             return $mixed;
         }
 
-        return static::db()->escape($mixed);
+        return static::db()->escape((string)$mixed);
     }
 
     /**
