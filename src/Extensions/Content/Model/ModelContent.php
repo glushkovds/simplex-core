@@ -15,7 +15,7 @@ class ModelContent extends ModelBase
 
     public static function aqModifyWithTemplate(AQ $AQ)
     {
-        $AQ->join(ModelContentTemplate::class, 'template_id');
+        $AQ->leftJoin(ModelContentTemplate::class, 'template_id');
     }
 
     public static function aqModifiersDefault(): array
