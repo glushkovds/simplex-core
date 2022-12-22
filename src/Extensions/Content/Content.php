@@ -40,6 +40,102 @@ class Content extends ComponentBase
     {
         $content = $this->get();
 
+        $loadAdditional = function (string $path) use (&$content) {
+            // don't load additional content if it's already loaded
+            if (isset($content[$path])) return;
+
+            if ($nc = ModelContent::findOne(['path' => $path, 'active' => 1])) {
+                $nc['params'] = unserialize($nc['params']);
+            }
+            $content[$path] = $nc;
+        };
+
+        $loadParent = function () use (&$content) {
+            if (isset($content['p'])) return;
+            if ($nc = ModelContent::findOne(['content_id' => $content['pid'], 'active' => 1])) {
+                $nc['params'] = unserialize($nc['params']);
+            }
+            $content['p'] = $nc;
+        };
+
+        $loadTable = function (string $param, string $path = '') use ($content) {
+            $params = $path ? $content[$path]['params'] : $content['params'];
+            return json_decode($params[$param] ?? '{"v":[]}', true)['v'];
+        };
+
+        $loadTableChld = function (string $param, $prm) {
+            return json_decode($prm['params'][$param] ?? '{"v":[]}', true)['v'];
+        };
+
+        $loadChildrenAll = function ($id, $but=0) {
+            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$id;
+            $q .= " ORDER BY title ASC";
+            $q = DB::query($q);
+            $children = [];
+            while ($c = DB::fetch($q)) {
+                if ($c['content_id'] == $but) continue;
+                $child = $c;
+                $child['params'] = unserialize($c['params']);
+                $children[] = $child;
+            }
+            return $children;
+        };
+
+        $loadChildrenCond = function (string $path, array $cond) {
+            $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
+            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
+            $q .= " ORDER BY title ASC";
+            $q = DB::query($q);
+            $children = [];
+            while ($c = DB::fetch($q)) {
+                $child = $c;
+                $child['params'] = unserialize($c['params']);
+                foreach ($cond as $k) {
+                    if (!($child['params'][$k] ?? false)) continue 2;
+                }
+                $children[] = $child;
+            }
+            return $children;
+        };
+
+        $loadChildrenAsc = function (string $path) {
+            $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
+            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
+            $q .= " ORDER BY title ASC";
+            $q = DB::query($q);
+            $children = [];
+            while ($c = DB::fetch($q)) {
+                $child = $c;
+                $child['params'] = unserialize($c['params']);
+                $children[] = $child;
+            }
+            return $children;
+        };
+
+        $loadChildren = function (string $path, int $max = 10, array $s = [], int $ignore = 0) {
+            $searchStr = [];
+            foreach ($s as $v) {
+                if (!trim($v)) continue;
+                $searchStr[] = 'params LIKE \'%' . DB::escape($v) . '%\'';
+            }
+
+            if ($searchStr && $ignore) {
+                $searchStr[] = 'content_id != ' . $ignore;
+            }
+
+            $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
+            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):'');
+            $q .= " ORDER BY date DESC LIMIT " . (int)$max;
+            $q = DB::query($q);
+            $children = [];
+            while ($c = DB::fetch($q)) {
+                $child = $c;
+                $child['params'] = unserialize($c['params']);
+                $children[] = $child;
+            }
+            return $children;
+        };
+
         if ($content) {
             if (!Core::ajax()) {
                 $this->breadcrumbs($content);
@@ -47,14 +143,40 @@ class Content extends ComponentBase
 
             Page::seo($content['title']);
 
-            $children = array();
+            $children = array(); $page = 0; $pages = 0; $hasPrev = false; $hasNext = false;
+            $link = Container::getRequest()->getPath();
             if (empty($content['params']['hide_children'])) {
-                $q = "SELECT content_id, title, short, text, path, photo FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
-                $children = DB::assoc($q);
+                $searchStr = [];
+                if (isset($_GET['search'])) {
+                    foreach (Container::getRequest()->get('search') as $v) {
+                        if (!trim($v)) continue;
+                        $searchStr[] = 'params LIKE \'%' . DB::escape($v) . '%\'';
+                    }
+                }
+
+                // count all values
+                $cnt = DB::result("SELECT COUNT(*) cnt FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):''), 'cnt');
+
+                $cnt = 15*50;
+                $pages = $cnt / 15;
+                $page = (int)Container::getRequest()->get('page');
+
+                $hasPrev = $page > 0;
+                $hasNext = $page < $pages - 1;
+
+                $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):'');
+                $q .= " ORDER BY date DESC LIMIT " . ($page * 15) . ", 15";
+                $q = DB::query($q);
+                $children = [];
+                while ($c = DB::fetch($q)) {
+                    $child = $c;
+                    $child['params'] = unserialize($c['params']);
+                    $children[] = $child;
+                }
             }
             include static::findTemplateFile($content->template_path ?? 'default.tpl');
         } else {
-            Core::error404();
+            include self::findTemplateFile('base/404.tpl');
         }
     }
 
