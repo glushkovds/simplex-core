@@ -1,8 +1,11 @@
 <?php
+
 namespace Simplex\Core;
 
 class Request
 {
+    protected $isHttps;
+    protected $host;
     protected $requestMethod;
     protected $headers;
     protected $getParams;
@@ -19,6 +22,8 @@ class Request
     public function __construct()
     {
         // cache values
+        $this->host = $_SERVER['HTTP_HOST'];
+        $this->isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off';
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->getParams = $_GET;
         $this->postParams = $_POST;
@@ -37,6 +42,11 @@ class Request
         $urlData = parse_url($_SERVER['REQUEST_URI']);
         $this->urlPath = $urlData['path'];
         $this->urlParts = array_slice(explode('/', $this->urlPath), 1);
+    }
+
+    public function getFullUrl(): string
+    {
+        return ($this->isHttps ? 'https://' : 'http://') . $this->host . $this->urlPath;
     }
 
     /**
@@ -137,5 +147,21 @@ class Request
     public function header(?string $k = null)
     {
         return $k ? ($this->headers[strtolower($k)] ?? null) : $this->headers;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHttps(): bool
+    {
+        return $this->isHttps;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost(): string
+    {
+        return $this->host;
     }
 }
