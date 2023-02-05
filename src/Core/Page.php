@@ -110,9 +110,11 @@ class Page
     {
         if ('css' === $type || strpos($file, '.css')) {
             static::css($file, $idx);
+            return;
         }
         if ('js' === $type || strpos($file, '.js')) {
             static::js($file, $idx);
+            return;
         }
         throw new \Exception("Unknown asset type (css or js?) for $file");
     }
