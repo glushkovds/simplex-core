@@ -84,7 +84,7 @@ class Content extends ComponentBase
         $loadChildrenCond = function (string $path, array $cond) {
             $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
             $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
-            $q .= " ORDER BY title ASC";
+            $q .= " ORDER BY date DESC";
             $q = DB::query($q);
             $children = [];
             while ($c = DB::fetch($q)) {
@@ -136,6 +136,7 @@ class Content extends ComponentBase
             return $children;
         };
 
+        $link = Container::getRequest()->getPath();
         if ($content) {
             if (!Core::ajax()) {
                 $this->breadcrumbs($content);
@@ -144,7 +145,6 @@ class Content extends ComponentBase
             Page::seo($content['title']);
 
             $children = array(); $page = 0; $pages = 0; $hasPrev = false; $hasNext = false;
-            $link = Container::getRequest()->getPath();
             if (empty($content['params']['hide_children'])) {
                 $searchStr = [];
                 if (isset($_GET['search'])) {
@@ -157,15 +157,20 @@ class Content extends ComponentBase
                 // count all values
                 $cnt = DB::result("SELECT COUNT(*) cnt FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):''), 'cnt');
 
-                $cnt = 15*50;
-                $pages = $cnt / 15;
+                // hack: fix this.
+                $pageCount = 15;
+                $pages = $cnt / $pageCount;
                 $page = (int)Container::getRequest()->get('page');
 
                 $hasPrev = $page > 0;
                 $hasNext = $page < $pages - 1;
 
                 $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):'');
-                $q .= " ORDER BY date DESC LIMIT " . ($page * 15) . ", 15";
+                if (isset($_GET['mob'])) {
+                    $q .= " ORDER BY date DESC LIMIT " . (($page + 1) * $pageCount);
+                } else {
+                    $q .= " ORDER BY date DESC LIMIT " . ($page * $pageCount) . ", " . $pageCount;
+                }
                 $q = DB::query($q);
                 $children = [];
                 while ($c = DB::fetch($q)) {
@@ -176,6 +181,12 @@ class Content extends ComponentBase
             }
             include static::findTemplateFile($content->template_path ?? 'default.tpl');
         } else {
+            if ($link == '/404') {
+                http_response_code(404);
+            } else {
+                header('Location: /404');
+                die;
+            }
             include self::findTemplateFile('base/404.tpl');
         }
     }
