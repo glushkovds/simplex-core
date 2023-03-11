@@ -739,5 +739,17 @@ class Time
         return $dateTime->format('Y-m-d');
     }
 
+    /**
+     * Returns date - end of the month of specified date
+     * @param string $forDate format Y-m-d (mysql)
+     * @return string format Y-m-d (mysql)
+     * @throws \Exception
+     */
+    public static function monthEnd(string $forDate): string
+    {
+        $dateTime = new \DateTime($forDate);
+        $dateTime = new \DateTime($dateTime->add(new \DateInterval('P1M'))->format('Y-m') . '-01');
+        return $dateTime->sub(new \DateInterval('P1D'))->format('Y-m-d');
+    }
 }
 
