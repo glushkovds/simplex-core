@@ -99,6 +99,26 @@ class Page
         }
     }
 
+    /**
+     * @param string $file Web path to asset file
+     * @param int $idx Priority from highest 0 to lowest 100
+     * @param string|null $type css/js - optional, to specify directly what is this asset
+     * @return void
+     * @throws \Exception
+     */
+    public static function addAsset(string $file, int $idx = 100, string $type = null)
+    {
+        if ('css' === $type || strpos($file, '.css')) {
+            static::css($file, $idx);
+            return;
+        }
+        if ('js' === $type || strpos($file, '.js')) {
+            static::js($file, $idx);
+            return;
+        }
+        throw new \Exception("Unknown asset type (css or js?) for $file");
+    }
+
     public static function css($file, $idx = 100)
     {
         if (SF_LOCATION == SF_LOCATION_ADMIN) {

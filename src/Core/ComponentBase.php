@@ -15,7 +15,7 @@ abstract class ComponentBase extends ExtensionBase
     public function __construct()
     {
         parent::__construct();
-        $this->rootHref = str_replace(['\\', $_SERVER['DOCUMENT_ROOT']], ['/', ''], $this->rootDir);
+        $this->rootHref = Path::dirToHref($this->rootDir);
     }
 
     protected abstract function content();
