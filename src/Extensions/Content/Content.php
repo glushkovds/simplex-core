@@ -36,105 +36,98 @@ class Content extends ComponentBase
         return $content;
     }
 
+    protected static function getTableFrom(string $param, $from): array
+    {
+        return json_decode($from['params'][$param] ?? '{"v":[]}', true)['v'];
+    }
+
+    protected static function getChildrenById(int $id, int $except = 0): array
+    {
+        $query = ModelContent::findAdv()->where([
+            'pid' => $id,
+            'active' => 1
+        ]);
+
+        if ($except) {
+            $query = $query->andWhere('content_id != ' . $except);
+        }
+
+        $children = $query->orderBy('title ASC')->all();
+        foreach ($children as $child) {
+            $child['params'] = unserialize($child['params']);
+        }
+
+        return $children;
+    }
+
+    protected static function getChildrenByPath(string $path): array
+    {
+        $children = ModelContent::findAdv()->where([
+            'path' => $path,
+            'active' => 1
+        ])->orderBy('title ASC')->all();
+
+        foreach ($children as $child) {
+            $child['params'] = unserialize($child['params']);
+        }
+
+        return $children;
+    }
+
+    protected static function getChildrenConditional(string $path, array $cond): array
+    {
+        $parent = ModelContent::findOne(['path' => $path, 'active' => 1])['content_id'];
+        $res = ModelContent::findAdv()->where([
+            'active' => 1,
+            'pid' => $parent
+        ])->orderBy('date DESC')->all();
+
+        $children = [];
+        foreach ($res as $c) {
+            $c['params'] = unserialize($c['params']);
+            foreach ($cond as $k) {
+                if (!($c['params'][$k] ?? false)) {
+                    continue 2;
+                }
+            }
+
+            $children[] = $c;
+        }
+
+        return $children;
+    }
+
+    protected function getChildren(string $path, int $max = 10, array $s = [], int $ignore = 0): array
+    {
+        $searchStr = [];
+        foreach ($s as $v) {
+            if (!trim($v)) {
+                continue;
+            }
+            $searchStr[] = 'params LIKE \'%' . DB::escape($v) . '%\'';
+        }
+
+        if ($searchStr && $ignore) {
+            $searchStr[] = 'content_id != ' . $ignore;
+        }
+
+        $parent = ModelContent::findOne(['path' => $path, 'active' => 1])['content_id'];
+        $children = ModelContent::findAdv()->where([
+            'active' => 1,
+            'pid' => $parent
+        ])->andWhere(implode(' AND ', $searchStr))->orderBy('date DESC LIMIT ' . $max)->all();
+
+        foreach ($children as $c) {
+            $c['params'] = unserialize($c['params']);
+            $children[] = $c;
+        }
+
+        return $children;
+    }
+
     protected function content()
     {
         $content = $this->get();
-
-        $loadAdditional = function (string $path) use (&$content) {
-            // don't load additional content if it's already loaded
-            if (isset($content[$path])) return;
-
-            if ($nc = ModelContent::findOne(['path' => $path, 'active' => 1])) {
-                $nc['params'] = unserialize($nc['params']);
-            }
-            $content[$path] = $nc;
-        };
-
-        $loadParent = function () use (&$content) {
-            if (isset($content['p'])) return;
-            if ($nc = ModelContent::findOne(['content_id' => $content['pid'], 'active' => 1])) {
-                $nc['params'] = unserialize($nc['params']);
-            }
-            $content['p'] = $nc;
-        };
-
-        $loadTable = function (string $param, string $path = '') use ($content) {
-            $params = $path ? $content[$path]['params'] : $content['params'];
-            return json_decode($params[$param] ?? '{"v":[]}', true)['v'];
-        };
-
-        $loadTableChld = function (string $param, $prm) {
-            return json_decode($prm['params'][$param] ?? '{"v":[]}', true)['v'];
-        };
-
-        $loadChildrenAll = function ($id, $but=0) {
-            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$id;
-            $q .= " ORDER BY title ASC";
-            $q = DB::query($q);
-            $children = [];
-            while ($c = DB::fetch($q)) {
-                if ($c['content_id'] == $but) continue;
-                $child = $c;
-                $child['params'] = unserialize($c['params']);
-                $children[] = $child;
-            }
-            return $children;
-        };
-
-        $loadChildrenCond = function (string $path, array $cond) {
-            $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
-            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
-            $q .= " ORDER BY date DESC";
-            $q = DB::query($q);
-            $children = [];
-            while ($c = DB::fetch($q)) {
-                $child = $c;
-                $child['params'] = unserialize($c['params']);
-                foreach ($cond as $k) {
-                    if (!($child['params'][$k] ?? false)) continue 2;
-                }
-                $children[] = $child;
-            }
-            return $children;
-        };
-
-        $loadChildrenAsc = function (string $path) {
-            $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
-            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'];
-            $q .= " ORDER BY title ASC";
-            $q = DB::query($q);
-            $children = [];
-            while ($c = DB::fetch($q)) {
-                $child = $c;
-                $child['params'] = unserialize($c['params']);
-                $children[] = $child;
-            }
-            return $children;
-        };
-
-        $loadChildren = function (string $path, int $max = 10, array $s = [], int $ignore = 0) {
-            $searchStr = [];
-            foreach ($s as $v) {
-                if (!trim($v)) continue;
-                $searchStr[] = 'params LIKE \'%' . DB::escape($v) . '%\'';
-            }
-
-            if ($searchStr && $ignore) {
-                $searchStr[] = 'content_id != ' . $ignore;
-            }
-
-            $content = ModelContent::findOne(['path' => $path, 'active' => 1]);
-            $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):'');
-            $q .= " ORDER BY date DESC LIMIT " . (int)$max;
-            $q = DB::query($q);
-            $children = [];
-            while ($c = DB::fetch($q)) {
-                $child = $c;
-                $child['params'] = unserialize($c['params']);
-                $children[] = $child;
-            }
-            return $children;
-        };
 
         $link = Container::getRequest()->getPath();
         if ($content) {
@@ -144,18 +137,30 @@ class Content extends ComponentBase
 
             Page::seo($content['title']);
 
-            $children = array(); $page = 0; $pages = 0; $hasPrev = false; $hasNext = false;
+            $children = array();
+            $page = 0;
+            $pages = 0;
+            $hasPrev = false;
+            $hasNext = false;
             if (empty($content['params']['hide_children'])) {
                 $searchStr = [];
                 if (isset($_GET['search'])) {
                     foreach (Container::getRequest()->get('search') as $v) {
-                        if (!trim($v)) continue;
+                        if (!trim($v)) {
+                            continue;
+                        }
                         $searchStr[] = 'params LIKE \'%' . DB::escape($v) . '%\'';
                     }
                 }
 
                 // count all values
-                $cnt = DB::result("SELECT COUNT(*) cnt FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):''), 'cnt');
+                $cnt = DB::result(
+                    "SELECT COUNT(*) cnt FROM content WHERE active=1 AND pid=" . (int)$content['content_id'] . ($searchStr ? (' AND ' . implode(
+                            ' AND ',
+                            $searchStr
+                        )) : ''),
+                    'cnt'
+                );
 
                 // hack: fix this.
                 $pageCount = 15;
@@ -165,7 +170,10 @@ class Content extends ComponentBase
                 $hasPrev = $page > 0;
                 $hasNext = $page < $pages - 1;
 
-                $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'].($searchStr?(' AND '.implode(' AND ',$searchStr)):'');
+                $q = "SELECT content_id, title, short, text, path, photo, date, params FROM content WHERE active=1 AND pid=" . (int)$content['content_id'] . ($searchStr ? (' AND ' . implode(
+                            ' AND ',
+                            $searchStr
+                        )) : '');
                 if (isset($_GET['mob'])) {
                     $q .= " ORDER BY date DESC LIMIT " . (($page + 1) * $pageCount);
                 } else {
@@ -179,6 +187,7 @@ class Content extends ComponentBase
                     $children[] = $child;
                 }
             }
+
             include static::findTemplateFile($content->template_path ?? 'default.tpl');
         } else {
             if ($link == '/404') {
@@ -187,6 +196,7 @@ class Content extends ComponentBase
                 header('Location: /404');
                 die;
             }
+
             include self::findTemplateFile('base/404.tpl');
         }
     }
