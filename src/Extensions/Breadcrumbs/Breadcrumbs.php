@@ -47,8 +47,18 @@ class Breadcrumbs extends ModuleBase
         }
     }
 
+    public static function get(): array
+    {
+        return array_reverse(self::$arr);
+    }
+
+    public static function getLast(): array
+    {
+        return self::$arr[array_key_first(self::$arr)];
+    }
+
     public static function add($name, $link)
     {
-        self::$arr[md5($link)] = array('name' => $name, 'link' => $link);
+        self::$arr[md5($link)] = ['name' => $name, 'link' => $link];
     }
 }

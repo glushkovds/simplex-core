@@ -14,7 +14,7 @@ class Page
     protected static $css_check = array();
     protected static $js = array();
     protected static $js_check = array();
-    protected static $seo_title = '';
+    public static $seo_title = '';
     protected static $seo_description = '';
     protected static $seo_keywords = '';
     protected static $seo_metatags = '';
@@ -176,6 +176,11 @@ class Page
     public static function addMetaRaw($str)
     {
         self::$meta_raw .= "$str\n";
+    }
+
+    public static function title()
+    {
+        return str_replace('<br/>', '', htmlspecialchars(self::$seo_title)) . (self::$seo_title ? ' | ' : '') . Core::siteParam('site_name');
     }
 
     public static function meta()

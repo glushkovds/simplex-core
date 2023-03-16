@@ -1,5 +1,4 @@
 <?php
-
 namespace Simplex\Core;
 
 class Request
