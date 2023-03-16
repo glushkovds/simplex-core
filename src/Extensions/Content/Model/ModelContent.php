@@ -2,6 +2,7 @@
 
 namespace Simplex\Extensions\Content\Model;
 
+use Simplex\Core\Buffer;
 use Simplex\Core\DB\AQ;
 use Simplex\Core\ModelBase;
 
@@ -23,34 +24,32 @@ class ModelContent extends ModelBase
         return ['withTemplate'];
     }
 
-    public function loadFrom(string $path)
+    public function loadFrom(string $path): ?ModelContent
     {
-        if (isset($this[$path])) {
-            return;
-        }
+        return Buffer::getOrSet('content.' . $path, function () use ($path) {
+            if ($nc = self::findOne(['path' => $path, 'active' => 1])) {
+                $nc['params'] = unserialize($nc['params']);
+            }
 
-        if ($nc = self::findOne(['path' => $path, 'active' => 1])) {
-            $nc['params'] = unserialize($nc['params']);
-        }
-        $this[$path] = $nc;
+            return $nc ?? null;
+        });
     }
 
     public function loadParent()
     {
-        if (isset($this['p'])) {
-            return;
-        }
+        $pid = $this['pid'];
+        return Buffer::getOrSet('content.parent.' . $pid, function () use ($pid) {
+            if ($nc = self::findOne(['content_id' => $this['pid'], 'active' => 1])) {
+                $nc['params'] = unserialize($nc['params']);
+            }
 
-        if ($nc = ModelContent::findOne(['content_id' => $this['pid'], 'active' => 1])) {
-            $nc['params'] = unserialize($nc['params']);
-        }
-
-        $this['p'] = $nc;
+            return $nc ?? null;
+        });
     }
 
     public function getTable(string $param, string $path = ''): array
     {
-        $params = $path ? $this[$path]['params'] : $this['params'];
+        $params = $path ? $this->loadFrom($path)['params'] : $this['params'];
         return json_decode($params[$param] ?? '{"v":[]}', true)['v'];
     }
 }

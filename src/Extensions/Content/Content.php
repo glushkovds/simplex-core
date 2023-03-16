@@ -194,7 +194,7 @@ class Content extends ComponentBase
                 http_response_code(404);
             } else {
                 header('Location: /404');
-                die;
+                exit;
             }
 
             include self::findTemplateFile('base/404.tpl');
