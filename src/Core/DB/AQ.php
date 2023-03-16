@@ -18,7 +18,7 @@ class AQ
     /** @var JoinClause[] */
     protected $join = [];
     protected $where = '';
-    protected $orderBy = '';
+    protected $orderBy = null;
     protected $limit = '';
     protected $asArray = false;
     /** @var ModelBase|null */
@@ -80,10 +80,10 @@ class AQ
     }
 
     /**
-     * @param string $orderBy
+     * @param string|null $orderBy
      * @return $this
      */
-    public function orderBy(string $orderBy)
+    public function orderBy(?string $orderBy)
     {
         $this->orderBy = $orderBy;
         return $this;

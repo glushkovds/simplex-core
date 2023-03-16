@@ -14,6 +14,7 @@ class Request
     protected $requestBody;
     protected $urlPath;
     protected $urlParts;
+    protected $serverInfo = [];
 
     /**
      * Request constructor.
@@ -41,6 +42,7 @@ class Request
         $urlData = parse_url($_SERVER['REQUEST_URI']);
         $this->urlPath = $urlData['path'];
         $this->urlParts = array_slice(explode('/', $this->urlPath), 1);
+        $this->serverInfo = $_SERVER;
     }
 
     public function getFullUrl(): string
@@ -146,5 +148,29 @@ class Request
     public function header(?string $k = null)
     {
         return $k ? ($this->headers[strtolower($k)] ?? null) : $this->headers;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHttps(): bool
+    {
+        return $this->isHttps;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost(): string
+    {
+        return $this->host;
+    }
+
+    /**
+     * @return array
+     */
+    public function getServerInfo(): array
+    {
+        return $this->serverInfo;
     }
 }
