@@ -61,4 +61,31 @@ class User extends ModelBase
         });
     }
 
+    /**
+     * @example User::findAdv()->modify('hasPrivileges', ['priv_name'])->all()
+     * @param DB\AQ $AQ
+     * @param array $privileges
+     * @return void
+     */
+    public static function aqModifyHasPrivileges(DB\AQ $AQ, array $privileges)
+    {
+        if (empty($privileges)) {
+            return;
+        }
+        // Allow multiple invoke this modifier
+        $tableSuffix = str_replace('.', '', microtime(true)) . rand(1000000, 9999999);
+        $table = static::$table;
+        $AQ->where("
+        $table.user_id IN(
+            SELECT user_id FROM $table
+            JOIN user_priv_personal AS user_priv_personal_$tableSuffix USING(user_id)
+            JOIN user_role AS user_role_$tableSuffix 
+                ON user_role_$tableSuffix.role_id = $table.role_id AND user_role_$tableSuffix.active = 1
+            JOIN user_role_priv AS user_role_priv_$tableSuffix ON user_role_priv_$tableSuffix.role_id = user_role_$tableSuffix.role_id
+            JOIN user_priv AS user_priv_$tableSuffix 
+                ON user_priv_$tableSuffix.priv_id=COALESCE(user_priv_personal_$tableSuffix.priv_id,user_role_priv_$tableSuffix.priv_id) 
+                AND user_priv_$tableSuffix.name IN('" . implode("','", DB::escape($privileges)) . "')
+        )
+        ");
+    }
 }
