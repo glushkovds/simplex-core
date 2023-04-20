@@ -38,7 +38,7 @@ class Content extends ComponentBase
 
     protected static function getTableFrom(string $param, $from): array
     {
-        return json_decode($from['params'][$param] ?? '{"v":[]}', true)['v'];
+        return json_decode($from['params'][$param] ?? '{"v":[]}', true)['v'] ?: [];
     }
 
     protected static function getChildrenById(int $id, int $except = 0): array
@@ -56,6 +56,31 @@ class Content extends ComponentBase
         foreach ($children as $child) {
             $child['params'] = unserialize($child['params']);
         }
+
+        return $children;
+    }
+
+    protected static function getChildrenSorted(int $id, string $sort, int $except = 0): array
+    {
+        $children = ModelContent::findAdv()->where([
+            'pid' => $id,
+            'active' => 1
+        ]);
+
+        if ($except) {
+            $children = $children->andWhere('content_id != ' . $except);
+        }
+
+        $children = $children->all();
+
+        foreach ($children as $child) {
+            $child['params'] = unserialize($child['params']);
+        }
+
+        // sort ascending, by param
+        usort($children, function ($a, $b) use ($sort) {
+            return $a['params'][$sort] > $b['params'][$sort] ? 1 : -1;
+        });
 
         return $children;
     }

@@ -54,7 +54,7 @@ class Breadcrumbs extends ModuleBase
 
     public static function getLast(): array
     {
-        return self::$arr[array_key_first(self::$arr)];
+        return self::$arr[array_key_first(self::$arr)] ?? [];
     }
 
     public static function add($name, $link)
