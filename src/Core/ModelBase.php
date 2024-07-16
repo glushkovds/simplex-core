@@ -135,7 +135,12 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
     public function fill(array $data)
     {
         $this->data = $data + $this->data;
-        $this->id = isset($this->data[static::$primaryKeyName]) ? (int)$this->data[static::$primaryKeyName] : null;
+        if (
+            ($suggestId = isset($this->data[static::$primaryKeyName]) ? (int)$this->data[static::$primaryKeyName] : null)
+            && (empty($this->id) || $suggestId !== $this->id)
+        ) {
+            $this->id = $suggestId;
+        }
         $this->afterFill();
         return $this;
     }
