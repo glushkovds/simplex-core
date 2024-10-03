@@ -28,6 +28,7 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
 
     protected $id;
     protected $data = [];
+    protected $offsetGetData = [];
     protected $dataBeforeUpdate = [];
     protected static $table;
     protected static $primaryKeyName;
@@ -418,12 +419,17 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
 
     public function offsetExists($offset)
     {
-        return isset($this->data[$offset]);
+        return isset($this->data[$offset]) || isset($this->offsetGetData[$offset]);
     }
 
     public function offsetUnset($offset)
     {
-        unset($this->data[$offset]);
+        if (isset($this->offsetGetData[$offset])) {
+            unset($this->offsetGetData[$offset]);
+        }
+        if (isset($this->data[$offset])) {
+            unset($this->data[$offset]);
+        }
         if ($offset == static::$primaryKeyName) {
             $this->id = null;
         }
@@ -436,13 +442,15 @@ abstract class ModelBase implements \ArrayAccess, \JsonSerializable
                 return $maybe;
             }
             if (method_exists($this, $method = 'offsetGet' . lcfirst($offset))) {
-                $this->data[$offset] = $this->$method();
+                $this->offsetGetData[$offset] = $this->$method();
             }
             if (method_exists($this, $method = 'offsetGet' . Str::toCamel($offset, false))) {
-                $this->data[$offset] = $this->$method();
+                $this->offsetGetData[$offset] = $this->$method();
             }
         }
-        return isset($this->data[$offset]) ? $this->data[$offset] : null;
+        return isset($this->offsetGetData[$offset])
+            ? $this->offsetGetData[$offset]
+            : (isset($this->data[$offset]) ? $this->data[$offset] : null);
     }
 
     public function __get($name)
